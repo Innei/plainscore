@@ -1,0 +1,155 @@
+score 0.1
+# 来路与星河  The Road Behind, the River of Stars
+#   I.  来路  The Road Behind   variants: overview, browse, read
+#   II. 星河  River of Stars
+#
+# Legend (score 0.1)
+#   Pitches sound as written. Durations w h q e s, "." dotted, "+" ties (w+s), r = rest.
+#   Counts 1 & 2 & 3 & 4 &; "2.3&" = bar 2 of the chord (or of the section, in a "once" part).
+#   Chord tones: bass; t1-t4 / v1-v6 low to high; top; chord = all; upper = all but the lowest;
+#     fifth = the chord tone nearest a fifth above the bass.
+#   Shifts: +5th (a perfect fifth up, in the chord or not) +8va +15ma +8vb +15mb.
+#   Dynamics: pppp .10  ppp .16  pp .22  p .32  mp .42  mf .50  f .55;
+#     ">" accent +.08, soft -.07, softer -.14; "ppp-mf" on a roll rises across its notes.
+#   roll X: notes enter X apart. late X: enters X after the count.
+#   overlap X: each note rings X past its value. ring X: each note rings for X.
+#   "1 Ped." presses or changes the sustain pedal; "4& *" lifts it.
+#   doubles P: plays P's notes on its own instrument. inner: engraved as a voice of its own on the staff.
+#   Form: a row plays only the parts it names. 85% shades a part; "92%-75%" shades bar by bar;
+#     "bars 3-4"; "on 1 and 3"; breath = all but lead and once parts stop for the last eighth;
+#     cut = whatever still rings stops at the downbeat. "in E" moves the section to E.
+#   form loop / loop from A1: the form repeats, from the top or from A1.
+#   Variants edit every form row: "drop P", "Q for P", "P <options>".
+#   mix: playback balance only. Text after "—" is a note to the reader.
+
+title   来路与星河  The Road Behind, the River of Stars
+by      Innei & Claude
+after   邱有句《云村的天边》《云村的风》《云村的告别》
+
+instruments
+  piano    piano
+  harp     harp
+  violins  violins
+  cello    cello
+
+piece theme  来路  The Road Behind
+  meter   4/4
+  tempo   q = 80
+  key     D major
+
+  variants
+    overview
+    browse   drop stream
+    read     drop stream, sparse for flow, melody on 1 and 3
+
+  chords theme  — bass | voicing
+    D        D2  | D4 F#4 A4
+    A/C#     C#2 | C#4 E4 A4
+    Bm       B1  | B3 D4 F#4
+    F#m/A    A1  | A3 C#4 F#4
+    G        G2  | B3 D4 G4
+    D/F#     F#2 | A3 D4 F#4
+    Em7      E2  | B3 D4 E4 G4
+    A        A2  | A3 C#4 E4 A4
+
+  part melody  piano  mf  overlap e  lead
+    | F#5 h   E5 q   D5 q  | E5 h.   A4 q         | D5 h    F#5 h       | A5 h    F#5 q   E5 q |
+    | D5 h    B4 q   D5 q  | F#5 h   A5 q   F#5 q | E5 h    D5 q   B4 q | E5 w                 |
+
+  part flow  piano  — dynamic from the form
+    1     bass        w   >
+    1&    bass+5th    q.  soft
+    2     bass+8va    q.
+    2&    t2          q.  soft
+    3     t3          q.
+    3&    t2          q.  soft
+    4     bass+8va    q.
+    4&    t1          q.  soft
+
+  part stream  piano  inner
+    1     t1+8va      q   softer  late s
+    1&    t3          q   softer  late s
+    2     t2+8va      q   softer  late s
+    2&    t1+8va      q   softer  late s
+    3     t3+8va      q   softer  late s
+    3&    t2+8va      q   softer  late s
+    4     t1+8va      q   softer  late s
+    4&    t3          q   softer  late s
+
+  part sparse  piano
+    1     bass        w   >
+    1     chord       h   soft    roll 30ms
+    3     upper       h   softer  roll 40ms
+
+  part cello-pad  cello  f
+    1     bass+8va    w+s
+
+  part violin-pad  violins  mp
+    1     t2+8va      w+s   late 40ms
+    1     top+8va     w+s   late 75ms
+
+  part harp-wash  harp  once  mf  — at the start of the section
+    1.1   D4 F#4 A4 D5 F#5 A5 D6   h.  roll s
+
+  part pizz  violins pizz.  mf
+    2     t1+8va      e
+    4     t3+8va      e
+
+  part pedal  — a change with every chord
+    1     Ped.
+
+  form  loop  — A1 A2 A3 A4, then again
+    A1  theme
+      flow p 80%, stream p 80%, pedal
+    A2  theme
+      flow mp, stream mp, melody, cello-pad, pedal
+    A3  theme
+      flow mp, stream mp, melody 8va, cello-pad, violin-pad, harp-wash, pedal
+    A4  theme
+      flow mp 85%, stream mp 85%, cello-pad 50%, pizz, pedal
+
+piece stars  星河  River of Stars
+  meter   4/4
+  tempo   q = 48
+  key     D lydian
+
+  chords stars  two bars each  — bass | voicing
+    Dmaj9(#11)  D2  | D3 A3 F#4 C#5 E5 G#5
+    E/D         D2  | E3 B3 E4 G#4 B4 E5
+    F#m9        F#2 | F#3 C#4 E4 A4 C#5 G#5
+    E/D
+
+  part pads  — long notes ring into the next chord
+    1.1   piano     bass       w+w+q  mp
+    1.1   piano     bass+8vb   w+w+q  pp
+    1.1   cello     bass+8va   w+w+q  mf
+    1.1   cello     v2         w+w+q  p       late 250ms
+    1.1   violins   v4+8va     w+w+q  p
+    1.1   violins   v5+8va     w+w+q  pp  >   late 190ms
+    1.1   violins   v6+8va     w+w+q  pp      late 375ms
+    1.1   harp      v3+8va v4+8va v5+8va v6+8va v3+15ma v4+15ma v5+15ma v6+15ma   h.  pp   roll 220ms
+    2.1   harp      v6+8va v5+8va v4+8va   h.  ppp  roll 250ms
+    2.1   piano     v6+8va     w      ppp     late 125ms
+
+  part pedal  — a change with every chord
+    1     Ped.
+
+  part quote  harp  p  ring w  — the opening of the melody, an octave higher
+    | r w | r w | r w | r w | F#6 w | E6 h   D6 h | E6 w | r h   A5 h |
+
+  part sparkle  harp  ad lib.  — on each eighth where the quote is silent
+    chance   22%
+    notes    D lydian, D6 to C#7, 8va 30% of the time
+    dynamic  pppp-pp
+    length   h.
+    timing   anywhere within the eighth
+    avoid    quote
+
+  form  loop  — the chords loop
+    A  stars
+      pads, pedal, quote, sparkle
+
+  mix  — the balance of the whole movement
+    piano    75%
+    cello    95%
+    harp     90%

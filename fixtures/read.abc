@@ -1,0 +1,82 @@
+X:1
+T:来路与星河  The Road Behind, the River of Stars
+T:I. 来路 The Road Behind · read
+C:Music by Innei & Claude
+C:After 邱有句《云村的天边》《云村的风》《云村的告别》
+M:4/4
+L:1/16
+Q:1/4=80
+%%score (melody) {(pianoR) (pianoL pianoPedal)} (harp) (violins) (pizz) (cello)
+V:melody clef=treble name="Melody"
+V:pianoR clef=treble name="Piano"
+V:pianoL clef=bass
+V:harp clef=treble name="Harp"
+V:violins clef=treble name="Violins"
+V:pizz clef=treble name="Violins pizz."
+V:cello clef=bass name="Cello"
+V:pianoPedal clef=bass
+K:D
+[V:melody] "^A1"z16 | z16 | z16 | z16 |
+[V:pianoR] !pp!!arpeggio![DFA]8 !arpeggio![FA]8 | !arpeggio![CEA]8 !arpeggio![EA]8 | !arpeggio![B,DF]8 !arpeggio![DF]8 | !arpeggio![A,CF]8 !arpeggio![CF]8 |
+[V:pianoL] !>!D,,16 | !>!C,,16 | !>!B,,,16 | !>!A,,,16 |
+[V:pianoPedal] "_Ped."x16 | "_✱ Ped."x16 | "_✱ Ped."x16 | "_sim."x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] z16 | z16 | z16 | z16 |
+[V:melody] z16 | z16 | z16 | z16 |
+[V:pianoR] !arpeggio![B,DG]8 !arpeggio![DG]8 | !arpeggio![A,DF]8 !arpeggio![DF]8 | !arpeggio![B,DEG]8 !arpeggio![DEG]8 | !arpeggio![A,CEA]8 !arpeggio![CEA]8 |
+[V:pianoL] !>!G,,16 | !>!F,,16 | !>!E,,16 | !>!A,,16 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] z16 | z16 | z16 | z16 |
+[V:melody] "^A2"!mf!f8 e4 z4 | e12 z4 | d8 f8 | a8 f4 z4 |
+[V:pianoR] !mp!!arpeggio![DFA]8 !arpeggio![FA]8 | !arpeggio![CEA]8 !arpeggio![EA]8 | !arpeggio![B,DF]8 !arpeggio![DF]8 | !arpeggio![A,CF]8 !arpeggio![CF]8 |
+[V:pianoL] !>!D,,16 | !>!C,,16 | !>!B,,,16 | !>!A,,,16 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] !f!D,16 | C,16 | B,,16 | A,,16 |
+[V:melody] d8 B4 z4 | f8 a4 z4 | e8 d4 z4 | e16 |
+[V:pianoR] !arpeggio![B,DG]8 !arpeggio![DG]8 | !arpeggio![A,DF]8 !arpeggio![DF]8 | !arpeggio![B,DEG]8 !arpeggio![DEG]8 | !arpeggio![A,CEA]8 !arpeggio![CEA]8 |
+[V:pianoL] !>!G,,16 | !>!F,,16 | !>!E,,16 | !>!A,,16 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] G,16 | F,16 | E,16 | A,16 |
+[V:melody] "^A3""^8va"f8 e4 z4 | e12 z4 | d8 f8 | a8 f4 z4 |
+[V:pianoR] !arpeggio![DFA]8 !arpeggio![FA]8 | !arpeggio![CEA]8 !arpeggio![EA]8 | !arpeggio![B,DF]8 !arpeggio![DF]8 | !arpeggio![A,CF]8 !arpeggio![CF]8 |
+[V:pianoL] !>!D,,16 | !>!C,,16 | !>!B,,,16 | !>!A,,,16 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] !mf!DFAd fad'2 z8 | z16 | z16 | z16 |
+[V:violins] !mp![fa]16 | [ea]16 | [df]16 | [cf]16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] D,16 | C,16 | B,,16 | A,,16 |
+[V:melody] d8 B4 z4 | f8 a4 z4 | e8 d4 z4 | e16 |
+[V:pianoR] !arpeggio![B,DG]8 !arpeggio![DG]8 | !arpeggio![A,DF]8 !arpeggio![DF]8 | !arpeggio![B,DEG]8 !arpeggio![DEG]8 | !arpeggio![A,CEA]8 !arpeggio![CEA]8 |
+[V:pianoL] !>!G,,16 | !>!F,,16 | !>!E,,16 | !>!A,,16 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] [dg]16 | [df]16 | [dg]16 | [ca]16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] G,16 | F,16 | E,16 | A,16 |
+[V:melody] "^A4"z16 | z16 | z16 | z16 |
+[V:pianoR] !p!!arpeggio![DFA]8 !arpeggio![FA]8 | !arpeggio![CEA]8 !arpeggio![EA]8 | !arpeggio![B,DF]8 !arpeggio![DF]8 | !arpeggio![A,CF]8 !arpeggio![CF]8 |
+[V:pianoL] !>!D,,16 | !>!C,,16 | !>!B,,,16 | !>!A,,,16 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z4 !mf!d2 z2 z4 a2 z2 | z4 c2 z2 z4 a2 z2 | z4 B2 z2 z4 f2 z2 | z4 A2 z2 z4 f2 z2 |
+[V:cello] !p!D,16 | C,16 | B,,16 | A,,16 |
+[V:melody] z16 | z16 | z16 | z16 |
+[V:pianoR] !arpeggio![B,DG]8 !arpeggio![DG]8 | !arpeggio![A,DF]8 !arpeggio![DF]8 | !arpeggio![B,DEG]8 !arpeggio![DEG]8 | !arpeggio![A,CEA]8 !arpeggio![CEA]8 |
+[V:pianoL] !>!G,,16 | !>!F,,16 | !>!E,,16 | !>!A,,16 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z4 B2 z2 z4 g2 z2 | z4 A2 z2 z4 f2 z2 | z4 B2 z2 z4 e2 z2 | z4 A2 z2 z4 e2 z2 |
+[V:cello] G,16 | F,16 | E,16 | A,16 |

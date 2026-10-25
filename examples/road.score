@@ -1,0 +1,230 @@
+score 0.1
+# 来路  The Road Behind
+#   Movement I of bgm.score, arranged as one through-composed piece. 4:02.
+#
+# Legend (score 0.1)
+#   Pitches sound as written. Durations w h q e s, "." dotted, "+" ties (w+s), r = rest.
+#   Counts 1 & 2 & 3 & 4 &; "2.3&" = bar 2 of the chord (or of the section, in a "once" part).
+#   Chord tones: bass; t1-t4 / v1-v6 low to high; top; chord = all; upper = all but the lowest;
+#     fifth = the chord tone nearest a fifth above the bass.
+#   Shifts: +5th (a perfect fifth up, in the chord or not) +8va +15ma +8vb +15mb.
+#   Dynamics: pppp .10  ppp .16  pp .22  p .32  mp .42  mf .50  f .55;
+#     ">" accent +.08, soft -.07, softer -.14; "ppp-mf" on a roll rises across its notes.
+#   roll X: notes enter X apart. late X: enters X after the count.
+#   overlap X: each note rings X past its value. ring X: each note rings for X.
+#   "1 Ped." presses or changes the sustain pedal; "4& *" lifts it.
+#   doubles P: plays P's notes on its own instrument. inner: engraved as a voice of its own on the staff.
+#   Form: a row plays only the parts it names. 85% shades a part; "92%-75%" shades bar by bar;
+#     "bars 3-4"; "on 1 and 3"; breath = all but lead and once parts stop for the last eighth;
+#     cut = whatever still rings stops at the downbeat. "in E" moves the section to E.
+#   form loop / loop from A1: the form repeats, from the top or from A1.
+#   Variants edit every form row: "drop P", "Q for P", "P <options>".
+#   mix: playback balance only. Text after "—" is a note to the reader.
+#
+#   lead: the tune. Breaths leave it ringing, and a piano lead is engraved as the melody.
+
+title   来路  The Road Behind
+by      Innei & Claude
+after   邱有句《云村的告别》
+
+instruments
+  piano    piano
+  harp     harp
+  violins  violins
+  cello    cello
+
+piece road  来路  The Road Behind
+  meter   4/4
+  tempo   q = 80
+  key     D major
+
+  chords prelude  — bass | voicing
+    D        D2  | D4 F#4 A4
+    G/D      D2  | B3 D4 G4
+    D
+    A/C#     C#2 | C#4 E4 A4
+
+  chords theme
+    D
+    A/C#
+    Bm       B1  | B3 D4 F#4
+    F#m/A    A1  | A3 C#4 F#4
+    G        G2  | B3 D4 G4
+    D/F#     F#2 | A3 D4 F#4
+    Em7      E2  | B3 D4 E4 G4
+    A        A2  | A3 C#4 E4 A4
+
+  chords turn
+    G
+    A        A2  | A3 C#4 E4
+    F#m7     F#2 | A3 C#4 E4
+    Bm
+    Em7      E2  | G3 B3 D4
+    A/C#
+    G
+    A7       A2  | A3 C#4 E4 G4
+
+  chords lift  — the dominant of the new key
+    A7sus4   A1  | E3 A3 D4 E4
+
+  chords coda
+    G
+    D/F#
+    Em7      E2  | B3 D4 E4 G4
+    A        A2  | A3 C#4 E4 A4
+    G
+    D/F#
+    Em7
+    G
+
+  chords fine
+    D        D2  | D3 D4 D5
+
+  part theme  piano  mf  overlap e  lead
+    | F#5 h   E5 q   D5 q  | E5 h.   A4 q         | D5 h    F#5 h       | A5 h    F#5 q   E5 q |
+    | D5 h    B4 q   D5 q  | F#5 h   A5 q   F#5 q | E5 h    D5 q   B4 q | E5 w                 |
+
+  part turn  piano  mf  overlap e  lead
+    | D5 q.   E5 e   D5 q   B4 q  | C#5 h.   A4 q        | A4 q   C#5 q   E5 q   F#5 q | F#5 h.   E5 e   D5 e |
+    | D5 q.   E5 e   G5 q   F#5 e   E5 e | E5 h   C#5 q   A4 q | B4 q   D5 q   G5 q   F#5 e   G5 e | A5 h   G5 q   E5 q |
+
+  part coda  piano  overlap e  lead  — the theme's close, climbing into the next octave
+    | mf D5 h   B4 q   D5 q  | F#5 h   A5 q   F#5 q | E5 h   D5 q   B4 q | E5 h   C#5 q   A5 q |
+    | mp D6 h   B5 q   D6 q  | F#6 h   A6 q   F#6 q | E6 h   D6 q   B5 q | B5 h   A5 h         |
+
+  part violin-theme  violins  doubles theme  overlap s  lead  — the theme an octave under the piano
+
+  part violin-turn  violins  doubles turn  overlap s  lead
+
+  part flow  piano  — dynamic from the form
+    1     bass        w   >
+    1&    fifth       q.  soft
+    2     bass+8va    q.
+    2&    t2          q.  soft
+    3     t3          q.
+    3&    t2          q.  soft
+    4     bass+8va    q.
+    4&    t1          q.  soft
+
+  part stream  piano  inner
+    1     t1+8va      q   softer  late s
+    1&    t3          q   softer  late s
+    2     t2+8va      q   softer  late s
+    2&    t1+8va      q   softer  late s
+    3     t3+8va      q   softer  late s
+    3&    t2+8va      q   softer  late s
+    4     t1+8va      q   softer  late s
+    4&    t3          q   softer  late s
+
+  part sparse  piano
+    1     bass        w   >
+    1     chord       h   soft    roll 30ms
+    3     upper       h   softer  roll 40ms
+
+  part drone  piano
+    1     bass        w   >
+
+  part cello-pad  cello  f
+    1     bass+8va    w+s
+
+  part violin-pad  violins
+    1     t2+8va      w+s   late 40ms
+    1     top+8va     w+s   late 75ms
+
+  part pizz  violins pizz.  mf
+    2     t1+8va      e
+    4     t3+8va      e
+
+  part pedal  — a change with every chord
+    1     Ped.
+
+  part turn-pedal  once  — the scale in bar 5 gets its own change
+    5.3   Ped.
+
+  part harp-roll  harp  once  — on the odd bars
+    1.1   t1+8va t2+8va t3+8va bass+15ma   h.  roll s
+    3.1   t1+8va t2+8va t3+8va bass+15ma   h.  roll s
+    5.1   t1+8va t2+8va t3+8va bass+15ma   h.  roll s
+    7.1   t1+8va t2+8va t3+8va bass+15ma   h.  roll s
+
+  part wash  harp  once
+    1.1   D4 F#4 A4 D5 F#5 A5 D6   h.  roll s
+
+  part wash-iv  harp  once
+    5.1   G3 B3 D4 G4 B4 D5 G5     h.  roll s
+
+  part gliss  harp  once  — up into the next section
+    8.4   A3 B3 C#4 D4 E4 F#4 G4 A4 B4 C#5   h  ppp-mp  roll 75ms
+
+  part pickup-d  piano  once  lead  — the pedal lifts as the pickup starts
+    4.4   *
+    4.4   D5   e.  mp soft
+    4.4&  E5   e.  mp soft
+
+  part pickup-b  piano  once  lead
+    8.4&  B4   e   mp
+    8.4&  C#5  e   mp  late s
+
+  part lift  once
+    1.1   piano    A1                 w    mp  >
+    1.1   piano    E3 A3 D4           h    p        roll 30ms
+    1.3   piano    E3 G3 C#4          h    mp  soft roll 30ms
+    1.3   Ped.
+    1.1   cello    A2                 w+s  mf
+    1.2&  harp     A3 B3 C#4 D4 E4 F#4 G4 A4 B4 C#5 D5 E5 F#5 G5 A5   h  ppp-mf  roll 120ms
+
+  part lift-strings  violins  once
+    1.1   D5    h     p
+    1.3   C#5   h+s   p
+    1.1   E5    w+s   pp   late 60ms
+
+  part coda-entry  once  — the band drops out under a low G and a falling harp
+    1.1   piano    G1    w    mf  >
+    1.1   piano    G2    w    mp
+    1.1   harp     G5 D5 B4 G4 D4 B3 G3   h.  mp  roll 112.5ms
+
+  part coda-strings  violins  once
+    1.1   G5    h.    mp
+    1.1   D5    h.    p    late 30ms
+
+  part final  piano  once  — the tonic, left to ring under the pedal
+    1.1   Ped.
+    1.1   bass         w+w  p
+    1.1   bass+8va     w+w  ppp
+    1.1   top          w+w  p   soft  late 20ms
+    1.1   harp  top+8va  w+w  pp  late 50ms
+
+  form  — mark, chords, then who plays
+    Intro  prelude  — 序
+      wash mp, stream p 85%, drone pp 85% bars 1-2, flow p 70% bars 3-4,
+      cello-pad 45% bars 3-4, violin-pad pp, pedal, breath, pickup-d
+    A1  theme  — 来路 I
+      flow p 85%, theme 85%, pedal
+    A2  theme  — 来路 II
+      flow mp, stream mp, cello-pad, theme, pedal, breath, pickup-b
+    B1  turn  — 回望
+      flow p 70%, cello-pad 90%, violin-pad p, harp-roll p, turn, pedal, turn-pedal, breath, gliss
+    A3  theme  — 来路 III
+      flow mp, stream mp, cello-pad, violin-pad pppp, wash mf, wash-iv p, theme 8va, violin-theme mf, pedal
+    A4  theme  — 余音
+      sparse mp 85%, cello-pad 50%, pizz, theme 85% on 1 and 3, pedal, breath
+    Lift  lift in E  — 升
+      lift, lift-strings, pedal
+    A5  theme in E  — 来路 IV
+      flow mp, stream mp, cello-pad, violin-pad mf, theme, pedal
+    B2  turn in E  — 回望
+      flow mp 75%, cello-pad 90%, harp-roll p, turn, violin-turn mp, pedal, turn-pedal, breath, gliss
+    A6  theme in E  — 来路 V
+      flow mf, stream mf, cello-pad, violin-pad pppp, wash mf, wash-iv p, theme f 8va, violin-theme f, pedal
+    Coda  coda in E  — 尾声
+      cut, coda-entry, coda-strings, flow mp 92%-75%, cello-pad 35% bars 3-8, violin-pad p bars 5-6, coda 92%-75%, pedal
+    Fine  fine in E  — 终
+      cut, final
+
+  mix  — playback balance; the score and MIDI ignore it
+    violin-theme   +13 dB  attack 200ms
+    violin-turn    +13 dB  attack 220ms
+    violin-pad     +6 dB
+    pizz           +16 dB
+    lift-strings   +13 dB  attack 400ms
+    coda-strings   +13 dB  attack 50ms

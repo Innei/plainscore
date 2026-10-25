@@ -1,0 +1,28 @@
+X:1
+T:来路与星河  The Road Behind, the River of Stars
+T:II. 星河 River of Stars · cosmos
+C:Music by Innei & Claude
+C:After 邱有句《云村的天边》《云村的风》《云村的告别》
+M:4/4
+L:1/16
+Q:1/4=48
+%%score {(pianoR) (pianoL pianoPedal)} (harp) (violins) (cello)
+V:pianoR clef=treble name="Piano"
+V:pianoL clef=bass
+V:harp clef=treble name="Harp"
+V:violins clef=treble name="Violins"
+V:cello clef=bass name="Cello"
+V:pianoPedal clef=bass
+K:DLyd
+[V:pianoR] z16 | "^8va"!ppp!g16 | z16 | e16 |
+[V:pianoL] !mp![D,,,D,,]16 | z16 | [D,,,D,,]16 | z16 |
+[V:pianoPedal] "_Ped."x16 | x16 | "_✱ Ped."x16 | x16 |
+[V:harp] "^ad lib. on 22\% of free eighths: D lydian D6–C#7, 8va 30\%, pppp–pp""^8va"!pp!!arpeggio![Fcefgc'e'g']12 z4 | !ppp!!arpeggio![ceg]12 z4 | !pp!!arpeggio![EGBegbe']12 z4 | !ppp!!arpeggio![GBe]12 z4 |
+[V:violins] "^8va"!pp!!>![ceg]16- | [ceg]16 | !>![GBe]16- | [GBe]16 |
+[V:cello] !mf![D,A,]16- | [D,A,]16 | [D,B,]16- | [D,B,]16 |
+[V:pianoR] z16 | g16 | z16 | e16 |
+[V:pianoL] [F,,,F,,]16 | z16 | [D,,,D,,]16 | z16 |
+[V:pianoPedal] "_✱ Ped."x16 | x16 | "_sim."x16 | x16 |
+[V:harp] !pp!!arpeggio![EAcefgac'g']16 | !ppp!!arpeggio![Aceg]8 d8 | !pp!!arpeggio![EGBegbe']16 | !ppp!!arpeggio![GBe]8 A8 |
+[V:violins] !>![Acg]16- | [Acg]16 | !>![GBe]16- | [GBe]16 |
+[V:cello] [F,C]16- | [F,C]16 | [D,B,]16- | [D,B,]16 |

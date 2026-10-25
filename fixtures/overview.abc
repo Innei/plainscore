@@ -1,0 +1,91 @@
+X:1
+T:来路与星河  The Road Behind, the River of Stars
+T:I. 来路 The Road Behind · overview
+C:Music by Innei & Claude
+C:After 邱有句《云村的天边》《云村的风》《云村的告别》
+M:4/4
+L:1/16
+Q:1/4=80
+%%score (melody) {(pianoR pianoInner) (pianoL pianoPedal)} (harp) (violins) (pizz) (cello)
+V:melody clef=treble name="Melody"
+V:pianoR clef=treble name="Piano" stem=up
+V:pianoInner clef=treble stem=down
+V:pianoL clef=bass
+V:harp clef=treble name="Harp"
+V:violins clef=treble name="Violins"
+V:pizz clef=treble name="Violins pizz."
+V:cello clef=bass name="Cello"
+V:pianoPedal clef=bass
+K:D
+[V:melody] "^A1"z16 | z16 | z16 | z16 |
+[V:pianoR] z !pp!d2A z f2d z a2f z d2A | z c2A z e2c z a2e z c2A | z B2F z d2B z f2d z B2F | z A2F z c2A z f2c z A2F |
+[V:pianoInner] x4 x2 F2 A2F2 x2 D2 | x4 x2 E2 A2E2 x2 C2 | x4 x2 D2 F2D2 x2 B,2 | x4 x2 C2 F2C2 x2 A,2 |
+[V:pianoL] !>!D,,2A,,2 D,4 z4 D,4 | !>!C,,2^G,,2 C,4 z4 C,4 | !>!B,,,2F,,2 B,,4 z4 B,,4 | !>!A,,,2E,,2 A,,4 z4 A,,4 |
+[V:pianoPedal] "_Ped."x16 | "_✱ Ped."x16 | "_✱ Ped."x16 | "_sim."x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] z16 | z16 | z16 | z16 |
+[V:melody] z16 | z16 | z16 | z16 |
+[V:pianoR] z B2G z d2B z g2d z B2G | z A2F z d2A z f2d z A2F | z B2E z d2B z e2d z B2E | z A2E z c2A z e2c z A2E |
+[V:pianoInner] x4 x2 D2 G2D2 x2 B,2 | x4 x2 D2 F2D2 x2 A,2 | x4 x2 D2 E2D2 x2 B,2 | x4 x2 C2 E2C2 x2 A,2 |
+[V:pianoL] !>!G,,2D,2 G,4 z4 G,4 | !>!F,,2C,2 F,4 z4 F,4 | !>!E,,2B,,2 E,4 z4 E,4 | !>!A,,2E,2 A,4 z4 A,4 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] z16 | z16 | z16 | z16 |
+[V:melody] "^A2"!mf!f8 e4 d4 | e12 A4 | d8 f8 | a8 f4 e4 |
+[V:pianoR] z !mp!d2A z f2d z a2f z d2A | z c2A z e2c z a2e z c2A | z B2F z d2B z f2d z B2F | z A2F z c2A z f2c z A2F |
+[V:pianoInner] x4 x2 F2 A2F2 x2 D2 | x4 x2 E2 A2E2 x2 C2 | x4 x2 D2 F2D2 x2 B,2 | x4 x2 C2 F2C2 x2 A,2 |
+[V:pianoL] !>!D,,2A,,2 D,4 z4 D,4 | !>!C,,2^G,,2 C,4 z4 C,4 | !>!B,,,2F,,2 B,,4 z4 B,,4 | !>!A,,,2E,,2 A,,4 z4 A,,4 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] !f!D,16 | C,16 | B,,16 | A,,16 |
+[V:melody] d8 B4 d4 | f8 a4 f4 | e8 d4 B4 | e16 |
+[V:pianoR] z B2G z d2B z g2d z B2G | z A2F z d2A z f2d z A2F | z B2E z d2B z e2d z B2E | z A2E z c2A z e2c z A2E |
+[V:pianoInner] x4 x2 D2 G2D2 x2 B,2 | x4 x2 D2 F2D2 x2 A,2 | x4 x2 D2 E2D2 x2 B,2 | x4 x2 C2 E2C2 x2 A,2 |
+[V:pianoL] !>!G,,2D,2 G,4 z4 G,4 | !>!F,,2C,2 F,4 z4 F,4 | !>!E,,2B,,2 E,4 z4 E,4 | !>!A,,2E,2 A,4 z4 A,4 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] G,16 | F,16 | E,16 | A,16 |
+[V:melody] "^A3""^8va"f8 e4 d4 | e12 A4 | d8 f8 | a8 f4 e4 |
+[V:pianoR] z d2A z f2d z a2f z d2A | z c2A z e2c z a2e z c2A | z B2F z d2B z f2d z B2F | z A2F z c2A z f2c z A2F |
+[V:pianoInner] x4 x2 F2 A2F2 x2 D2 | x4 x2 E2 A2E2 x2 C2 | x4 x2 D2 F2D2 x2 B,2 | x4 x2 C2 F2C2 x2 A,2 |
+[V:pianoL] !>!D,,2A,,2 D,4 z4 D,4 | !>!C,,2^G,,2 C,4 z4 C,4 | !>!B,,,2F,,2 B,,4 z4 B,,4 | !>!A,,,2E,,2 A,,4 z4 A,,4 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] !mf!DFAd fad'2 z8 | z16 | z16 | z16 |
+[V:violins] !mp![fa]16 | [ea]16 | [df]16 | [cf]16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] D,16 | C,16 | B,,16 | A,,16 |
+[V:melody] d8 B4 d4 | f8 a4 f4 | e8 d4 B4 | e16 |
+[V:pianoR] z B2G z d2B z g2d z B2G | z A2F z d2A z f2d z A2F | z B2E z d2B z e2d z B2E | z A2E z c2A z e2c z A2E |
+[V:pianoInner] x4 x2 D2 G2D2 x2 B,2 | x4 x2 D2 F2D2 x2 A,2 | x4 x2 D2 E2D2 x2 B,2 | x4 x2 C2 E2C2 x2 A,2 |
+[V:pianoL] !>!G,,2D,2 G,4 z4 G,4 | !>!F,,2C,2 F,4 z4 F,4 | !>!E,,2B,,2 E,4 z4 E,4 | !>!A,,2E,2 A,4 z4 A,4 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] [dg]16 | [df]16 | [dg]16 | [ca]16 |
+[V:pizz] z16 | z16 | z16 | z16 |
+[V:cello] G,16 | F,16 | E,16 | A,16 |
+[V:melody] "^A4"z16 | z16 | z16 | z16 |
+[V:pianoR] z !p!d2A z f2d z a2f z d2A | z c2A z e2c z a2e z c2A | z B2F z d2B z f2d z B2F | z A2F z c2A z f2c z A2F |
+[V:pianoInner] x4 x2 F2 A2F2 x2 D2 | x4 x2 E2 A2E2 x2 C2 | x4 x2 D2 F2D2 x2 B,2 | x4 x2 C2 F2C2 x2 A,2 |
+[V:pianoL] !>!D,,2A,,2 D,4 z4 D,4 | !>!C,,2^G,,2 C,4 z4 C,4 | !>!B,,,2F,,2 B,,4 z4 B,,4 | !>!A,,,2E,,2 A,,4 z4 A,,4 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z4 !mf!d2 z2 z4 a2 z2 | z4 c2 z2 z4 a2 z2 | z4 B2 z2 z4 f2 z2 | z4 A2 z2 z4 f2 z2 |
+[V:cello] !p!D,16 | C,16 | B,,16 | A,,16 |
+[V:melody] z16 | z16 | z16 | z16 |
+[V:pianoR] z B2G z d2B z g2d z B2G | z A2F z d2A z f2d z A2F | z B2E z d2B z e2d z B2E | z A2E z c2A z e2c z A2E |
+[V:pianoInner] x4 x2 D2 G2D2 x2 B,2 | x4 x2 D2 F2D2 x2 A,2 | x4 x2 D2 E2D2 x2 B,2 | x4 x2 C2 E2C2 x2 A,2 |
+[V:pianoL] !>!G,,2D,2 G,4 z4 G,4 | !>!F,,2C,2 F,4 z4 F,4 | !>!E,,2B,,2 E,4 z4 E,4 | !>!A,,2E,2 A,4 z4 A,4 |
+[V:pianoPedal] x16 | x16 | x16 | x16 |
+[V:harp] z16 | z16 | z16 | z16 |
+[V:violins] z16 | z16 | z16 | z16 |
+[V:pizz] z4 B2 z2 z4 g2 z2 | z4 A2 z2 z4 f2 z2 | z4 B2 z2 z4 e2 z2 | z4 A2 z2 z4 e2 z2 |
+[V:cello] G,16 | F,16 | E,16 | A,16 |

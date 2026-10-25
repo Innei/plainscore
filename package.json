@@ -1,0 +1,35 @@
+{
+  "name": "plainscore",
+  "version": "0.1.0",
+  "description": "A plain-text score format a musician can read and an AI can edit, with MIDI and ABC export.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.23.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "plainscore": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./abc": "./dist/abc/index.js",
+    "./midi": "./dist/midi.js",
+    "./legend": "./dist/legend.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepare": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}
