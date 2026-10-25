@@ -3,6 +3,20 @@
   "version": "0.1.0",
   "description": "A plain-text score format a musician can read and an AI can edit, with MIDI and ABC export.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Innei/plainscore.git"
+  },
+  "homepage": "https://github.com/Innei/plainscore#readme",
+  "keywords": [
+    "music",
+    "score",
+    "notation",
+    "abc",
+    "midi",
+    "dsl",
+    "composer"
+  ],
   "type": "module",
   "packageManager": "pnpm@10.23.0",
   "engines": {
@@ -18,7 +32,9 @@
     "./legend": "./dist/legend.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "docs/grammar.md",
+    "llms.txt"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
