@@ -56,7 +56,7 @@ The full reference is [docs/grammar.md](docs/grammar.md). Every score can carry 
 ## Use
 
 ```bash
-pnpm add -D github:Innei/plainscore
+pnpm add -D plainscore
 ```
 
 ```bash

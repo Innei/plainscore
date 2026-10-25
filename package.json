@@ -2,7 +2,6 @@
   "name": "plainscore",
   "version": "0.1.0",
   "description": "A plain-text score format a musician can read and an AI can edit, with MIDI and ABC export.",
-  "private": true,
   "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@10.23.0",
