@@ -104,7 +104,7 @@ pnpm typecheck
 pnpm build
 ```
 
-`fixtures/` holds the output of the score engine this format came from (the [resume](https://github.com/Innei/resume) lab, commit 34d99d7). The examples must reproduce its MIDI byte for byte and its ABC except one title line.
+`fixtures/` holds the expected ABC, MIDI and events for `examples/`. After an intended output change, run `pnpm test -u` and review the fixture diff.
 
 ## License
 
