@@ -3,6 +3,7 @@ name: Publish
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -23,6 +24,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - name: Tag matches package.json
+        if: startsWith(github.ref, 'refs/tags/')
         run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
       - run: npm install -g npm@latest
       - run: npm publish
