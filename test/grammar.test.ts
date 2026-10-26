@@ -79,7 +79,7 @@ describe('variants', () => {
 
 describe('errors name the file and line', () => {
   const cases: [string, string, RegExp][] = [
-    ['a missing version', 'title x\n', /^t\.score line 1: start the file with "score 0\.1"/],
+    ['a missing version', 'title x\n', /^t\.score line 1: start the file with "score 0\.2"/],
     ['an unknown loop target', piece('loop from Z\n    A  a\n      pad, line, echo\n'), /line 18: no section "Z" to loop from/],
     ['mixing in a part header', once('  part loud  piano  +3 dB\n    1  bass  w\n'), /line 18: "\+3" is mixing; put it in the piece's mix block/],
     ['a part that never plays', once('  part idle  piano  p\n    1  bass  w\n'), /line 18: idle never plays; name it in a form row/],

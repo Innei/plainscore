@@ -55,10 +55,11 @@ piece song  Evening Song
 ![One file, four outputs: check, events, ABC, MIDI](docs/images/outputs.png)
 
 - Install: `pnpm add -D plainscore` (Node 20+).
-- CLI: `plainscore check|abc|midi|events|legend <file> [--piece id] [--variant v] [--seed n] [--passes n] [-o out.mid]`.
+- CLI: `plainscore check|abc|midi|events|legend <file> [--piece id] [--variant v] [--seed n] [--passes n] [--perform] [-o out.mid]`.
 - API: `render(parseScore(text, file), piece, { variant, seed })`, then `toAbc(r)` or `toMidi(r)`.
 - Staves follow `instruments`. The family (`piano harp violins violas cello bass flute oboe clarinet bassoon horn trumpet voice synth`) sets clef, MIDI program and pedal. A piano `lead` gets a Melody staff; `pizz.` gets its own staff.
-- Not in 0.1: meters other than 4/4, tuplets, ties across barlines, tempo changes, hairpins, repeats with endings, imports, percussion.
+- New in 0.2: sixteenth counts, chords shorter than a bar, hairpins, rit./accel./a tempo/fermata, and a `perform` block that shapes timing and touch like a pianist.
+- Not yet: meters other than 4/4, tuplets, ties across barlines, repeats with endings, imports, percussion.
 
 ## Docs
 

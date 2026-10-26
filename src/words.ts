@@ -34,6 +34,12 @@ export interface LineNote {
   dynamic?: number
 }
 
+export interface Hairpin {
+  at: number
+  end: number
+  up: boolean
+}
+
 export const BAR = 8
 export const DYNAMICS: Record<string, number> = { pppp: 0.1, ppp: 0.16, pp: 0.22, p: 0.32, mp: 0.42, mf: 0.5, f: 0.55 }
 export const MARKS: Record<string, number> = { '>': 0.08, soft: -0.07, softer: -0.14 }
@@ -90,10 +96,12 @@ export const dynamic = (word: string) => {
   return DYNAMICS[word]
 }
 
-const count = (word: string) => {
-  const m = word.match(/^(?:([1-9]\d*)\.)?([1-9])(&)?$/)
+const SUBDIVISIONS: Record<string, number> = { e: 0.5, '&': 1, a: 1.5 }
+
+export const count = (word: string) => {
+  const m = word.match(/^(?:([1-9]\d*)\.)?([1-9])(&|e|a)?$/)
   if (!m || Number(m[2]) > BAR / 2) throw new Error(`"${word}" is not a count in 4/4`)
-  return (Number(m[1] ?? 1) - 1) * BAR + (Number(m[2]) - 1) * 2 + (m[3] ? 1 : 0)
+  return (Number(m[1] ?? 1) - 1) * BAR + (Number(m[2]) - 1) * 2 + (m[3] ? SUBDIVISIONS[m[3]] : 0)
 }
 
 export const cue = (words: string[], isInst: (word: string) => boolean): Cue => {
@@ -122,20 +130,39 @@ export const cue = (words: string[], isInst: (word: string) => boolean): Cue => 
 
 export const line = (bars: string) => {
   const notes: LineNote[] = []
+  const hairpins: Hairpin[] = []
   let at = 0
   let level: number | undefined
+  let open: { from: number; up: boolean; level: number } | null = null
+  const close = (to: number) => {
+    const ramp = notes.slice(open!.from)
+    const start = ramp[0]?.at
+    if (start === undefined || open!.up !== to > open!.level) throw new Error(`a "${open!.up ? '<' : '>'}" must end on a ${open!.up ? 'louder' : 'softer'} dynamic`)
+    const span = at - start
+    for (const n of ramp) n.dynamic = open!.level + ((to - open!.level) * (n.at - start)) / span
+    hairpins.push({ at: start, end: at, up: open!.up })
+    open = null
+  }
   for (const bar of bars.split('|').map((b) => b.trim()).filter(Boolean)) {
     const words = bar.split(/\s+/)
     const start = at
     for (let i = 0; i < words.length; i += 2) {
-      if (words[i] in DYNAMICS) level = DYNAMICS[words[i++]]
+      if (words[i] in DYNAMICS) {
+        if (open) close(DYNAMICS[words[i]])
+        level = DYNAMICS[words[i++]]
+      }
+      if (words[i] === '<' || words[i] === '>') {
+        if (level === undefined) throw new Error(`give a dynamic before "${words[i]}", as "mp ${words[i]} D5 q"`)
+        open = { from: notes.length, up: words[i++] === '<', level }
+      }
       const length = duration(words[i + 1] ?? '')
       if (words[i] !== 'r') notes.push({ at, midi: note(words[i]), length, ...(level === undefined ? {} : { dynamic: level }) })
       at += length
     }
     if (at - start !== BAR) throw new Error(`bar "${bar}" lasts ${at - start} eighths, not ${BAR}`)
   }
-  return { notes, span: at }
+  if (open) throw new Error(`end the "${(open as { up: boolean }).up ? '<' : '>'}" on a dynamic before a note`)
+  return { notes, hairpins, span: at }
 }
 
 export const prose = (words: string[]) => {

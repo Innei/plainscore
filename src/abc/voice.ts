@@ -99,7 +99,7 @@ export const pedalVoice = (pedals: Pedal[], bars: number) => {
   })
 }
 
-export const writeVoice = (sheet: Sheet, style: VoiceStyle, events: ScoreEvent[], top: boolean, said: Map<number, string>, remark?: string) => {
+export const writeVoice = (sheet: Sheet, style: VoiceStyle, events: ScoreEvent[], top: boolean, said: Map<number, string>, remark?: string, signs?: Map<number, string[]>) => {
   const spellers = new Map(sheet.keys.map((k) => [k.bar, speller(k.tonic, sheet.mode)]))
   let s = spellers.get(0) ?? speller(sheet.tonic, sheet.mode)
   const total = sheet.bars * BAR
@@ -111,6 +111,7 @@ export const writeVoice = (sheet: Sheet, style: VoiceStyle, events: ScoreEvent[]
   if (remark) prefix(0, `"^${remark.replaceAll('%', '\\%')}"`)
   if (top) for (const section of sheet.labels) prefix(section.bar * BAR, `"^${section.label}"`)
   for (const [pos, mark] of octaves) prefix(pos, mark)
+  for (const [pos, list] of signs ?? []) for (const text of list) prefix(pos, text)
   let dynamic = ''
   for (let bar = 0; bar < sheet.bars && !style.inner; bar++) {
     const inBar = list.filter((o) => Math.floor(o.pos / BAR) === bar)
@@ -160,7 +161,7 @@ export const writeVoice = (sheet: Sheet, style: VoiceStyle, events: ScoreEvent[]
       last = null
     }
     const len = p.len === 1 ? '' : String(p.len)
-    const marks = [...(prefixes.get(p.pos) ?? [])].filter((m) => p.midis || m.startsWith('"'))
+    const marks = [...(prefixes.get(p.pos) ?? [])].filter((m) => p.midis || m.startsWith('"') || m === '!fermata!')
     prefixes.delete(p.pos)
     if (p.midis && p.accent) marks.push('!>!')
     if (p.midis && p.arpeggio) marks.push('!arpeggio!')

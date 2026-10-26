@@ -32,14 +32,14 @@ describe('plainscore cli', () => {
   })
 
   it('prints the legend', () => {
-    expect(cli('legend').stdout).toMatch(/^# Legend \(score 0\.1\)/)
+    expect(cli('legend').stdout).toMatch(/^# Legend \(score 0\.2\)/)
   })
 
   it('fails with the file and line', () => {
     const file = join(mkdtempSync(join(tmpdir(), 'plainscore-')), 'bad.score')
-    writeFileSync(file, 'score 0.2\n')
+    writeFileSync(file, 'score 0.9\n')
     const run = cli('check', file)
     expect(run.status).toBe(1)
-    expect(run.stderr).toContain('bad.score line 1: start the file with "score 0.1"')
+    expect(run.stderr).toContain('bad.score line 1: start the file with "score 0.2"')
   })
 })

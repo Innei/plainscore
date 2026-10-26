@@ -1,11 +1,13 @@
-# score 0.1 grammar
+# score 0.2 grammar
+
+A `score 0.1` file still reads and renders exactly as before. Everything marked **0.2** below needs `score 0.2` on the first line.
 
 A score is a UTF-8 text file. Indentation carries structure: file-level lines start at column 0, a piece's blocks at 2 spaces, block rows at 4, and form entries deeper than 4. Lines starting with `#` are comments. Anything after ` — ` (an em dash between spaces) on a line is a note to the reader and is ignored.
 
 ## File
 
 ```
-score 0.1                       the first line, always
+score 0.2                       the first line, always (or score 0.1)
 
 title   Small Waltz             optional, file-wide
 by      You                     optional; written as "Music by You"
@@ -36,6 +38,7 @@ piece waltz  Small Waltz        <id>  <title>; a file can hold several pieces
 - Durations: `w h q e s` (whole to sixteenth), `.` dotted (`q.`), `+` ties (`w+s`, `h+q`).
 - `r` is a rest in bar lines.
 - Counts are beats and ands: `1 1& 2 2& 3 3& 4 4&`. `2.3&` means bar 2, the and of 3.
+- **0.2** Sixteenths: `1e 1& 1a`, so `2.3a` is the last sixteenth of beat 3 in bar 2.
 
 ## Chords
 
@@ -50,6 +53,15 @@ piece waltz  Small Waltz        <id>  <title>; a file can hold several pieces
 ```
 
 A section is as long as the chord set it names.
+
+**0.2** A chord row may end with its length. Once any row in a set has one, rows without it last a bar (or the set's `two bars each`), the set must add up to whole bars, and cue parts repeat every bar, taking their chord tones from the chord sounding at each count.
+
+```
+  chords push
+    G        h
+    G/F#     F#2 | B3 D4 G4   h
+    Em7      w
+```
 
 ## Parts
 
@@ -73,6 +85,7 @@ Every part has a name and, unless each cue names one, an instrument. Header word
   part tune  piano  mf  overlap e  lead
     | F#5 h   E5 q   D5 q  | E5 h.   A4 q  |
     | mp D6 h   B5 q   D6 q | … |               a dynamic before a note applies from there
+    | mp < C5 q  D5 q  E5 q  F5 q | mf G5 w |    0.2: "<" swells to the next dynamic, ">" fades
 ```
 
 Each bar must add up to a whole note.
@@ -143,6 +156,11 @@ One line per entry: `<count> [instrument] <pitches> <duration> [options]`. A cue
   - `bars 3-4`.
   - `on 1 and 3`: only notes that start on those beats.
   - A shift: `8va`, `8vb`.
+- **0.2** Hairpins: `mp>p` fades a part across the row (or its `bars`), `p<mf` swells it; add `from 7.1` to hold the first dynamic until that count.
+- **0.2** Tempo, as items of the row:
+  - `rit. from 7.3 to q = 66` and `accel. from 5.1 to q = 96` ramp from the count to the end of the row; the new tempo holds after it.
+  - `a tempo` goes back to the piece's tempo at the start of the row.
+  - `fermata 8.3` holds that count until the next note starts, at half speed.
 - `breath`: every part but `lead` and `once` parts stops for the last eighth.
 - `cut`: whatever still rings stops at the downbeat.
 - Both also lift the pedal.
@@ -173,6 +191,23 @@ All variants share one timeline.
 ```
 
 Rows name a part or an instrument.
+
+## Perform
+
+**0.2** How a pianist would play it: on by default in a `score 0.2` piece, used by `render(…, { perform: true })`, `plainscore midi --perform` and players that call `perform()`. The sheet and the plain MIDI ignore it.
+
+```
+  perform  — or "perform off"
+    lead     ahead 18ms      the tune lands a little before the accompaniment
+    phrase   2 bars          the span of each tempo and loudness arc, counted from each section
+    rubato   4%              presses on through the phrase, broadens into its end
+    accents  6%              beat 1 strongest, then 3; off-beats lighter
+    swell    10%             each phrase grows toward its middle
+    spread   8ms             notes struck together enter from the bass up
+    jitter   5ms             a little unplanned looseness, the same on every render
+```
+
+Any row can be `off`.
 
 ## Errors
 

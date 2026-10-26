@@ -3,7 +3,7 @@ import type { Clef } from '../families.ts'
 import type { Rendering } from '../render.ts'
 import { type Staff, layout } from '../staves.ts'
 import { DYNAMICS } from '../words.ts'
-import { keyName } from './spell.ts'
+import { keyName, onGrid } from './spell.ts'
 import { type Sheet, pedalVoice, writeVoice } from './voice.ts'
 
 const NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -46,6 +46,38 @@ const remarks = (r: Rendering, staves: Staff[]) => {
     if (!staff) continue
     const range = `${noteName(rule.notes[0])}–${noteName(rule.notes[rule.notes.length - 1])}`
     out.set(staff.id, `ad lib. on ${Math.round(rule.chance * 100)}% of free eighths: ${NAMES[r.tonic]} ${r.mode} ${range}, 8va ${Math.round(rule.octave * 100)}%, ${dynamicName(rule.dynamic[0])}–${dynamicName(rule.dynamic[1])}`)
+  }
+  return out
+}
+
+const onset = (e: ScoreEvent) => e.step * 2 + (onGrid(e.offset) ? e.offset * 2 : 0)
+
+const signs = (r: Rendering, voices: Voice[], voiceOf: (e: ScoreEvent) => string) => {
+  const out = new Map(voices.map((v) => [v.id, new Map<number, string[]>()]))
+  const add = (id: string, pos: number, text: string) => {
+    const list = out.get(id)!
+    list.set(pos, [...(list.get(pos) ?? []), text])
+  }
+  const onsets = new Map(voices.map((v) => [v.id, r.events.filter((e) => voiceOf(e) === v.id).map(onset)]))
+  for (const m of r.marks) {
+    const pos = Math.round(m.at * 2)
+    if (m.kind !== 'fermata') add(voices[0].id, pos, `"^${m.kind}"`)
+    else
+      for (const v of voices) {
+        const held = Math.max(...onsets.get(v.id)!.filter((x) => x <= pos))
+        if (v.hand !== 'Inner' && held > pos - 16) add(v.id, Number.isFinite(held) ? held : pos, '!fermata!')
+      }
+  }
+  for (const h of r.hairpins) {
+    const notes = r.events.filter((e) => e.part === h.part && e.step + e.offset >= h.at - 1e-6 && e.step + e.offset <= h.end + 1e-6)
+    const ids = new Set(notes.map(voiceOf))
+    const id = [...ids].find((x) => x.endsWith('R')) ?? [...ids].find((x) => !x.endsWith('Inner'))
+    if (!id) continue
+    const places = notes.filter((e) => voiceOf(e) === id).map(onset)
+    const [start, end] = [Math.min(...places), Math.max(...places)]
+    if (start >= end) continue
+    add(id, start, h.up ? '!<(!' : '!>(!')
+    add(id, end, h.up ? '!<)!' : '!>)!')
   }
   return out
 }
@@ -104,11 +136,12 @@ export const toAbc = (r: Rendering) => {
     `K:${keyName(r.tonic, r.mode)}`,
   ]
   const said = new Map<string, Map<number, string>>()
+  const marked = signs(r, voices, voiceOf)
   const written = voices.map((v, i) => {
     if (!said.has(v.staff.id)) said.set(v.staff.id, new Map())
     const style = { inner: v.hand === 'Inner', rings: v.staff.rings, clef: v.clef }
     const remark = v.hand === 'Inner' || v.hand === 'L' ? undefined : notes.get(v.staff.id)
-    return writeVoice(sheet, style, r.events.filter((e) => voiceOf(e) === v.id), i === 0, said.get(v.staff.id)!, remark)
+    return writeVoice(sheet, style, r.events.filter((e) => voiceOf(e) === v.id), i === 0, said.get(v.staff.id)!, remark, marked.get(v.id))
   })
   const pedalLines = new Map([...pedals].map(([id, list]) => [id, pedalVoice(list, r.bars)]))
   const body: string[] = []

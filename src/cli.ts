@@ -10,9 +10,9 @@ import { DEFAULT_SEED, render } from './render.ts'
 
 const USAGE = `usage:
   plainscore check <file>
-  plainscore events <file> [--piece id] [--variant v] [--seed n] [--passes n]
+  plainscore events <file> [--piece id] [--variant v] [--seed n] [--passes n] [--perform]
   plainscore abc <file> [--piece id] [--variant v]
-  plainscore midi <file> [--piece id] [--variant v] [--seed n] [--passes n] -o out.mid
+  plainscore midi <file> [--piece id] [--variant v] [--seed n] [--passes n] [--perform] -o out.mid
   plainscore legend`
 
 const main = () => {
@@ -23,6 +23,7 @@ const main = () => {
       variant: { type: 'string' },
       seed: { type: 'string' },
       passes: { type: 'string' },
+      perform: { type: 'boolean' },
       output: { type: 'string', short: 'o' },
       help: { type: 'boolean', short: 'h' },
     },
@@ -43,7 +44,7 @@ const main = () => {
   const passes = number(values.passes, 'passes')
   if (command === 'abc') return void process.stdout.write(`${toAbc(render(score, piece, { variant: values.variant }))}\n`)
   const seed = number(values.seed, 'seed') ?? DEFAULT_SEED
-  const rendering = render(score, piece, { variant: values.variant, seed, passes })
+  const rendering = render(score, piece, { variant: values.variant, seed, passes, perform: values.perform })
   if (command === 'events') return void process.stdout.write(`${JSON.stringify(rendering, null, 2)}\n`)
   if (!values.output) throw new Error('midi needs -o <file.mid>')
   writeFileSync(values.output, toMidi(rendering))

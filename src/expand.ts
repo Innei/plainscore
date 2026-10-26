@@ -1,4 +1,4 @@
-import { type AdLib, type Articulation, type Entry, type Part, type PieceSource, type Row, type ScoreFile, parseScore } from './parse.ts'
+import { type AdLib, type Articulation, type Entry, type Part, type Perform, type PieceSource, type Row, type ScoreFile, type TempoMark, parseScore } from './parse.ts'
 import { BAR, type Chord, type Pedal, type Ref, eighths, pitchName, resolve, resolves } from './words.ts'
 
 export interface ScoreEvent {
@@ -41,11 +41,27 @@ export interface AdLibRule extends Omit<AdLib, 'avoid'>, Voice {
   free: number[]
 }
 
+export interface TempoSign {
+  at: number
+  kind: TempoMark['kind']
+}
+
+export interface HairpinSign {
+  part: string
+  at: number
+  end: number
+  up: boolean
+}
+
 export interface Expanded {
   id: string
   title: string
   variant: string | null
   tempo: number
+  clock: number[]
+  marks: TempoSign[]
+  hairpins: HairpinSign[]
+  perform: Perform | null
   tonic: number
   mode: string
   bars: number
@@ -133,6 +149,7 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
   const chords: Chord[] = []
   const events: ScoreEvent[] = []
   const pedals: Pedal[] = []
+  const hairpins: HairpinSign[] = []
   const cuts: { at: number; all: boolean }[] = []
   const exempt = new Set<string>()
   const pianos = score.instruments.filter((i) => i.family === 'piano')
@@ -143,13 +160,19 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
   const adlibRows: { part: Playing; row: Row; bar: number; bars: number; opt: Entry }[] = []
   for (const row of rows) {
     const progression = piece.progressions.get(row.chords)!
-    const unit = progression.barsPerChord * BAR
+    const timed = progression.lengths.some((l) => l !== null)
+    const unit = timed ? BAR : progression.barsPerChord * BAR
+    const lengths = progression.lengths.map((l) => l ?? progression.barsPerChord * BAR)
+    const changes = lengths.map((_, i) => lengths.slice(0, i).reduce((a, b) => a + b, 0))
+    const chordAt = (at: number) => progression.chords[changes.findLastIndex((c) => c <= at + 1e-9)]
     const bar = chords.length
-    const bars = progression.chords.length * progression.barsPerChord
+    const bars = lengths.reduce((a, b) => a + b, 0) / BAR
     const voices = new Map<string, Voice>()
     const voice = (inst: string, articulation?: Articulation) => voices.set(`${inst} ${articulation ?? ''}`, { inst, articulation: articulation ?? null })
-    for (const c of progression.chords)
-      for (let k = 0; k < progression.barsPerChord; k++) chords.push({ symbol: c.symbol, bass: c.bass + row.key, tones: c.tones.map((t) => t + row.key) })
+    for (let k = 0; k < bars; k++) {
+      const c = chordAt(k * BAR)
+      chords.push({ symbol: c.symbol, bass: c.bass + row.key, tones: c.tones.map((t) => t + row.key) })
+    }
     if (row.cut) cuts.push({ at: bar * BAR, all: true })
     if (row.breath) cuts.push({ at: (bar + bars) * BAR - 1, all: false })
     for (const [name, opt] of row.entries) {
@@ -160,6 +183,15 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
       const shade = (k: number) => from + (bars > 1 ? ((to - from) * k) / (bars - 1) : 0)
       const shift = row.key + opt.shift + part.shift
       const base = { part: part.name, articulation: part.articulation ?? null, lead: part.lead, inner: part.inner }
+      const span = [opt.rampFrom ?? (opt.bars?.[0] ?? 0) * BAR, ((opt.bars?.[1] ?? bars - 1) + 1) * BAR]
+      if (span[0] >= span[1]) fail(score.lines.get(row), `the hairpin on ${name} starts past the end of ${row.mark}`)
+      const ramp = (at: number, level: number) => {
+        if (!opt.ramp) return level
+        const t = Math.min(1, Math.max(0, (at - span[0]) / (span[1] - span[0] - 1)))
+        return (level * (opt.ramp[0] + (opt.ramp[1] - opt.ramp[0]) * t)) / opt.ramp[0]
+      }
+      if (opt.ramp) hairpins.push({ part: part.name, at: bar * BAR + span[0], end: bar * BAR + span[1] - 1, up: opt.ramp[1] > opt.ramp[0] })
+      const timing = (at: number) => ({ step: bar * BAR + Math.floor(at), late: at % 1 })
       if (part.adlib) {
         if (opt.dynamic !== undefined || opt.shade || opt.shift || opt.beats) fail(score.lines.get(row), `${name} is ad lib.; the form can only give it "bars 3-4"`)
         adlibRows.push({ part, row, bar, bars, opt })
@@ -173,13 +205,15 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
         for (const n of part.notes) {
           const k = Math.floor(n.at / BAR)
           if (!playsIn(k) || (opt.beats && !opt.beats.includes(n.at % BAR))) continue
-          const level = (opt.dynamic ?? n.dynamic ?? part.dynamic ?? fail(part.line, `${name} needs a dynamic`)) * shade(k)
+          const level = ramp(n.at, opt.ramp?.[0] ?? opt.dynamic ?? n.dynamic ?? part.dynamic ?? fail(part.line, `${name} needs a dynamic`)) * shade(k)
           const length = part.ring ?? n.length + (part.overlap ?? 0)
-          events.push({ ...base, ...mixOf(name, inst), inst, role: null, rolled: false, level, velocity: level, midi: n.midi + shift, length, written: n.length, offset: 0, step: bar * BAR + n.at })
+          const { step, late } = timing(n.at)
+          events.push({ ...base, ...mixOf(name, inst), inst, role: null, rolled: false, level, velocity: level, midi: n.midi + shift, length, written: n.length, offset: late, step })
         }
+        for (const h of part.hairpins) if (playsIn(Math.floor(h.at / BAR))) hairpins.push({ part: part.name, at: bar * BAR + h.at, end: bar * BAR + h.end, up: h.up })
         continue
       }
-      const starts = part.once ? [0] : progression.chords.map((_, i) => i * unit)
+      const starts = part.once ? [0] : Array.from({ length: (bars * BAR) / unit }, (_, i) => i * unit)
       for (const start of starts)
         for (const c of part.cues) {
           const where = score.lines.get(c)
@@ -193,12 +227,13 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
             continue
           }
           const inst = c.inst ?? part.inst ?? fail(where, `part ${name} needs an instrument`)
-          const level = c.dynamic ?? opt.dynamic ?? part.dynamic ?? fail(where, `${name} needs a dynamic in ${row.mark}`)
-          const chord = progression.chords[Math.floor(k / progression.barsPerChord)]
+          const level = ramp(at, c.dynamic ?? opt.ramp?.[0] ?? opt.dynamic ?? part.dynamic ?? fail(where, `${name} needs a dynamic in ${row.mark}`))
+          const chord = chordAt(at)
           for (const p of c.pitches) if (!resolves(p, chord)) fail(where, `${chord.symbol} has no ${pitchName(p)}`)
           voice(inst, part.articulation)
           const notes = c.pitches.flatMap((p) => resolve(p, chord))
-          const late = eighths(c.late, eighth)
+          const { step, late: sixteenth } = timing(at)
+          const late = sixteenth + eighths(c.late, eighth)
           const roll = eighths(c.roll, eighth)
           const rise = (i: number) => (c.rise === undefined || notes.length < 2 ? 0 : ((c.rise - level) * i) / (notes.length - 1))
           notes.forEach(({ midi, role }, i) =>
@@ -214,7 +249,7 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
               length: c.length,
               written: c.length,
               offset: late + i * roll,
-              step: bar * BAR + at,
+              step,
             }),
           )
         }
@@ -246,6 +281,7 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
     if (seam !== null && pos + e.length > seam) e.length = seam - pos
     return true
   })
+  const { clock, marks } = tempoMap(piece, rows, sections, kept, total, (row, message) => fail(score.lines.get(row), message))
   const adlibs = adlibRows.map(({ part, bar, bars, opt }) => {
     const { avoid, ...rule } = part.adlib!
     const busy = new Set(kept.filter((e) => e.part === avoid).map((e) => e.step))
@@ -259,6 +295,10 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
     title: piece.title,
     variant: variant ?? piece.variants[0]?.name ?? null,
     tempo: piece.tempo,
+    clock,
+    marks,
+    hairpins,
+    perform: piece.perform,
     tonic: piece.tonic,
     mode: piece.mode,
     bars: total,
@@ -269,6 +309,49 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
     pedals,
     adlibs,
   }
+}
+
+const tempoMap = (piece: PieceSource, rows: Row[], sections: ExpandedSection[], events: ScoreEvent[], total: number, fail: (row: Row, message: string) => never) => {
+  const clock = new Array<number>(total * BAR).fill(30 / piece.tempo)
+  const marks: TempoSign[] = []
+  let bpm = piece.tempo
+  rows.forEach((row, i) => {
+    const from = sections[i].bar * BAR
+    const to = from + sections[i].bars * BAR
+    const within = (m: TempoMark) => {
+      if (m.at >= to - from) fail(row, `${row.mark} has only ${sections[i].bars} bars`)
+      return from + m.at
+    }
+    if (row.tempo.some((m) => m.kind === 'a tempo')) {
+      bpm = piece.tempo
+      marks.push({ at: from, kind: 'a tempo' })
+    }
+    for (let s = from; s < to; s++) clock[s] = 30 / bpm
+    const change = row.tempo.find((m) => m.kind === 'rit.' || m.kind === 'accel.')
+    if (change) {
+      const start = within(change)
+      const target = change.bpm!
+      if (change.kind === 'rit.' ? target >= bpm : target <= bpm) fail(row, `${change.kind} from q = ${bpm} must go ${change.kind === 'rit.' ? 'slower' : 'faster'}, not to q = ${target}`)
+      const begin = bpm
+      for (let s = Math.floor(start); s < to; s++) clock[s] = 30 / (begin + ((target - begin) * (s - start + 0.5)) / (to - start))
+      marks.push({ at: start, kind: change.kind })
+      bpm = target
+    }
+    for (const m of row.tempo.filter((x) => x.kind === 'fermata')) {
+      const at = within(m)
+      const next = Math.min(to, ...events.map((e) => e.step + e.offset).filter((pos) => pos > at + 1e-6))
+      for (let s = Math.floor(at); s < Math.ceil(next); s++) clock[s] *= 2
+      marks.push({ at, kind: 'fermata' })
+    }
+  })
+  return { clock, marks: marks.sort((a, b) => a.at - b.at) }
+}
+
+export const secondsAt = (clock: number[], pos: number) => {
+  let t = 0
+  const whole = Math.floor(pos)
+  for (let s = 0; s < whole && s < clock.length; s++) t += clock[s]
+  return t + (pos - whole) * (clock[Math.min(whole, clock.length - 1)] ?? 0)
 }
 
 export const adlibAt = (rule: AdLibRule, step: number, random: () => number): ScoreEvent | null => {

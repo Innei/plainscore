@@ -1,7 +1,8 @@
 import { FAMILIES as FAMILY_TABLE } from './families.ts'
-import { type Chord, type Cue, DYNAMICS, type LineNote, MODES, SHIFTS, cue, duration, dynamic, header, line, note, prose, tonic } from './words.ts'
+import { BAR, type Chord, type Cue, DYNAMICS, type Hairpin, type LineNote, MODES, SHIFTS, count, cue, duration, dynamic, header, isDuration, line, note, prose, tonic } from './words.ts'
 
-export const VERSION = '0.1'
+export const VERSION = '0.2'
+export const VERSIONS = ['0.1', '0.2']
 export const FAMILIES = Object.keys(FAMILY_TABLE)
 export const ARTICULATIONS = ['pizz.', 'arco'] as const
 export type Articulation = (typeof ARTICULATIONS)[number]
@@ -35,11 +36,14 @@ export interface Part {
   adlib?: AdLib
   cues: Cue[]
   notes: LineNote[]
+  hairpins: Hairpin[]
   span: number
 }
 
 export interface Entry {
   dynamic?: number
+  ramp?: [number, number]
+  rampFrom?: number
   shade?: [number, number]
   shift: number
   bars?: [number, number]
@@ -53,8 +57,27 @@ export interface Row {
   key: number
   breath: boolean
   cut: boolean
+  tempo: TempoMark[]
   entries: Map<string, Entry>
 }
+
+export interface TempoMark {
+  kind: 'rit.' | 'accel.' | 'a tempo' | 'fermata'
+  at: number
+  bpm?: number
+}
+
+export interface Perform {
+  lead: number
+  phrase: number
+  rubato: number
+  accents: number
+  swell: number
+  spread: number
+  jitter: number
+}
+
+export const PERFORM: Perform = { lead: 0.018, phrase: 2, rubato: 0.04, accents: 0.06, swell: 0.1, spread: 0.008, jitter: 0.005 }
 
 export interface Variant {
   name: string
@@ -66,6 +89,7 @@ export interface Variant {
 export interface Progression {
   barsPerChord: number
   chords: Chord[]
+  lengths: (number | null)[]
 }
 
 export interface PieceSource {
@@ -80,10 +104,12 @@ export interface PieceSource {
   loop: { from: string | null } | null
   variants: Variant[]
   mix: Map<string, { gain: number; attack?: number }>
+  perform: Perform | null
 }
 
 export interface ScoreFile {
   file: string
+  version: string
   title: string
   by: string
   after: string
@@ -100,18 +126,32 @@ const transpose = (from: number, to: number) => {
   return up > 6 ? up - 12 : up
 }
 
-export const entry = (words: string[]): Entry => {
+const needs = (next: boolean, what: string) => {
+  if (!next) throw new Error(`${what} needs "score 0.2" on the first line`)
+}
+
+export const entry = (words: string[], next = true): Entry => {
   const out: Entry = { shift: 0 }
   while (words.length) {
     const word = words.shift()!
     const shade = word.match(/^(\d+)%(?:-(\d+)%)?$/)
+    const ramp = word.match(/^(\w+)([<>])(\w+)$/)
     if (word in DYNAMICS) out.dynamic = DYNAMICS[word]
+    else if (ramp && ramp[1] in DYNAMICS && ramp[3] in DYNAMICS) {
+      needs(next, `"${word}"`)
+      const [from, to] = [DYNAMICS[ramp[1]], DYNAMICS[ramp[3]]]
+      if ((ramp[2] === '<') !== to > from) throw new Error(`"${word}" goes the wrong way; "<" gets louder, ">" softer`)
+      out.ramp = [from, to]
+    }
     else if (word in SHIFTS) out.shift += SHIFTS[word]
     else if (shade) out.shade = [Number(shade[1]) / 100, Number(shade[2] ?? shade[1]) / 100]
     else if (word === 'bars') {
       const range = words.shift()?.match(/^(\d+)-(\d+)$/)
       if (!range) throw new Error('write a bar range as "bars 3-4"')
       out.bars = [Number(range[1]) - 1, Number(range[2]) - 1]
+    } else if (word === 'from') {
+      if (!out.ramp) throw new Error('"from" starts a hairpin; write it as "mp>p from 7.1"')
+      out.rampFrom = count(words.shift() ?? '')
     } else if (word === 'on') {
       const beats = words.join(' ').match(/^([1-4](?: and [1-4])*)$/)
       if (!beats) throw new Error('write it as "on 1 and 3"')
@@ -152,7 +192,7 @@ const partHeader = (words: string[], isInst: (word: string) => boolean): Part & 
   const [name, ...rest] = prose(words)
   if (!name) throw new Error('name the part, as "part flow  piano"')
   if (isInst(name)) throw new Error(`"${name}" is an instrument; give the part its own name`)
-  const part: Part & { adlibRows?: string[][] } = { name, once: false, lead: false, inner: false, cues: [], notes: [], span: 0 }
+  const part: Part & { adlibRows?: string[][] } = { name, once: false, lead: false, inner: false, cues: [], notes: [], hairpins: [], span: 0 }
   while (rest.length) {
     const word = rest.shift()!
     if (isInst(word) && !part.inst) {
@@ -176,14 +216,55 @@ const partHeader = (words: string[], isInst: (word: string) => boolean): Part & 
   return part
 }
 
-const variantRow = (words: string[]): Variant => {
+const PERFORM_ROWS: Record<string, [RegExp, (m: RegExpMatchArray) => number, string]> = {
+  lead: [/^ahead (\d+(?:\.\d+)?)ms$/, (m) => Number(m[1]) / 1000, 'lead  ahead 18ms'],
+  phrase: [/^(\d+) bars?$/, (m) => Number(m[1]), 'phrase  2 bars'],
+  rubato: [/^(\d+(?:\.\d+)?)%$/, (m) => Number(m[1]) / 100, 'rubato  4%'],
+  accents: [/^(\d+(?:\.\d+)?)%$/, (m) => Number(m[1]) / 100, 'accents  6%'],
+  swell: [/^(\d+(?:\.\d+)?)%$/, (m) => Number(m[1]) / 100, 'swell  10%'],
+  spread: [/^(\d+(?:\.\d+)?)ms$/, (m) => Number(m[1]) / 1000, 'spread  8ms'],
+  jitter: [/^(\d+(?:\.\d+)?)ms$/, (m) => Number(m[1]) / 1000, 'jitter  5ms'],
+}
+
+const performRow = (words: string[], perform: Perform) => {
+  const [key, ...rest] = prose(words)
+  const rule = PERFORM_ROWS[key]
+  if (!rule) throw new Error(`unknown "${key}" in perform; use ${Object.keys(PERFORM_ROWS).join(', ')}`)
+  const text = rest.join(' ')
+  if (text === 'off') return void (perform[key as keyof Perform] = 0)
+  const m = text.match(rule[0])
+  if (!m) throw new Error(`write it as "${rule[2]}" or "${key}  off"`)
+  perform[key as keyof Perform] = rule[1](m)
+}
+
+const tempoMark = (item: string, next: boolean): TempoMark | null => {
+  const words = item.split(/\s+/)
+  if (words[0] === 'rit.' || words[0] === 'accel.') {
+    needs(next, `"${words[0]}"`)
+    const m = item.match(/^(?:rit|accel)\. from (\S+) to q = (\d+)$/)
+    if (!m) throw new Error(`write it as "${words[0]} from 7.3 to q = 66"`)
+    return { kind: words[0], at: count(m[1]), bpm: Number(m[2]) }
+  }
+  if (item === 'a tempo') {
+    needs(next, '"a tempo"')
+    return { kind: 'a tempo', at: 0 }
+  }
+  if (words[0] === 'fermata') {
+    needs(next, '"fermata"')
+    if (words.length !== 2) throw new Error('write it as "fermata 8.3"')
+    return { kind: 'fermata', at: count(words[1]) }
+  }
+  return null
+}
+
+const variantRow = (words: string[], next: boolean): Variant => {
   const [name, ...rest] = prose(words)
   const out: Variant = { name, drop: [], swaps: [], extras: new Map() }
   for (const item of rest.join(' ').split(',').map((x) => x.trim()).filter(Boolean)) {
     const edit = item.split(/\s+/)
     if (edit[0] === 'drop' && edit.length === 2) out.drop.push(edit[1])
     else if (edit[1] === 'for' && edit.length === 3) out.swaps.push([edit[0], edit[2]])
-    else if (edit.length > 1) out.extras.set(edit[0], entry(edit.slice(1)))
+    else if (edit.length > 1) out.extras.set(edit[0], entry(edit.slice(1), next))
     else throw new Error(`"${item}" is not an edit; write "drop P", "Q for P" or "P <options>"`)
   }
   return out
@@ -209,12 +290,13 @@ const mixRow = (words: string[]) => {
 }
 
 export const parseScore = (text: string, file = 'score'): ScoreFile => {
-  const score: ScoreFile = { file, title: '', by: '', after: '', instruments: [], pieces: [], lines: new WeakMap() }
+  const score: ScoreFile = { file, version: '', title: '', by: '', after: '', instruments: [], pieces: [], lines: new WeakMap() }
   const { lines } = score
   const isInst = (word: string) => score.instruments.some((i) => i.name === word)
   const adlibs = new Map<Part, { rows: string[][]; line: number }>()
   const rowText = new Map<Row, string[]>()
   let version = ''
+  const next = () => version !== '0.1'
   let block = ''
   let piece: PieceSource | null = null
   const fail = (at: number | undefined, message: string): never => {
@@ -228,8 +310,8 @@ export const parseScore = (text: string, file = 'score'): ScoreFile => {
     const n = i + 1
     try {
       if (!version) {
-        if (indent !== 0 || words[0] !== 'score' || words[1] !== VERSION || words.length > 2) throw new Error(`start the file with "score ${VERSION}"`)
-        version = words[1]
+        if (indent !== 0 || words[0] !== 'score' || !VERSIONS.includes(words[1]) || words.length > 2) throw new Error(`start the file with "score ${VERSION}"`)
+        version = score.version = words[1]
         return
       }
       if (indent === 0) {
@@ -243,7 +325,7 @@ export const parseScore = (text: string, file = 'score'): ScoreFile => {
         } else if (key === 'piece') {
           if (!rest[0] || !/^[a-z][\w-]*$/i.test(rest[0])) throw new Error('write it as "piece <id>  <title>", with an id like "theme"')
           if (score.pieces.some((p) => p.id === rest[0])) throw new Error(`there is already a piece "${rest[0]}"`)
-          piece = { id: rest[0], title: rest.slice(1).join(' '), tempo: 0, tonic: -1, mode: 'major', progressions: new Map(), parts: [], rows: [], loop: null, variants: [], mix: new Map() }
+          piece = { id: rest[0], title: rest.slice(1).join(' '), tempo: 0, tonic: -1, mode: 'major', progressions: new Map(), parts: [], rows: [], loop: null, variants: [], mix: new Map(), perform: next() ? { ...PERFORM } : null }
           score.pieces.push(piece)
           lines.set(piece, n)
         } else throw new Error(`unknown "${key}"`)
@@ -271,10 +353,18 @@ export const parseScore = (text: string, file = 'score'): ScoreFile => {
           p.mode = mode
         } else if (key === 'variants' || key === 'mix') {
           if (prose(rest).length) throw new Error(`"${key}" takes no words; list its rows below it`)
+        } else if (key === 'perform') {
+          needs(next(), '"perform"')
+          const words = prose(rest)
+          if (words.length && words.join(' ') !== 'off') throw new Error('"perform" takes no words, or "off"')
+          if (words.length) {
+            p.perform = null
+            block = 'perform off'
+          }
         } else if (key === 'chords') {
           const [, name, bars] = header(key, rest, /^(\S+)(?: (one|two|three|four|\d+) bars? each)?$/, 'theme  two bars each')
           if (p.progressions.has(name)) throw new Error(`there is already a chord set "${name}"`)
-          p.progressions.set(name, { barsPerChord: bars ? (COUNTS[bars] ?? Number(bars)) : 1, chords: [] })
+          p.progressions.set(name, { barsPerChord: bars ? (COUNTS[bars] ?? Number(bars)) : 1, chords: [], lengths: [] })
           block = `chords ${name}`
         } else if (key === 'part') {
           const part = partHeader(rest, isInst)
@@ -291,11 +381,16 @@ export const parseScore = (text: string, file = 'score'): ScoreFile => {
         return
       }
       if (block.startsWith('chords ')) {
-        const [symbol, bass, bar, ...tones] = prose(words)
+        const row = prose(words)
+        const length = row.length > 1 && isDuration(row[row.length - 1]) ? duration(row.pop()!) : null
+        if (length !== null) needs(next(), 'a chord length')
+        const [symbol, bass, bar, ...tones] = row
         const latest = [...p.progressions.values()].flatMap((x) => x.chords).findLast((c) => c.symbol === symbol)
         if (bass === undefined && !latest) throw new Error(`"${symbol}" has no voicing yet; write "<symbol> <bass> | <voicing>"`)
-        if (bass !== undefined && bar !== '|') throw new Error('chord rows look like "<symbol> <bass> | <voicing>"')
-        p.progressions.get(block.slice(7))!.chords.push(bass === undefined ? latest! : { symbol, bass: note(bass), tones: tones.map(note) })
+        if (bass !== undefined && bar !== '|') throw new Error('chord rows look like "<symbol> <bass> | <voicing>", then an optional length')
+        const progression = p.progressions.get(block.slice(7))!
+        progression.chords.push(bass === undefined ? latest! : { symbol, bass: note(bass), tones: tones.map(note) })
+        progression.lengths.push(length)
       } else if (block === 'part') {
         const part = p.parts[p.parts.length - 1]
         const adlib = adlibs.get(part)
@@ -304,11 +399,14 @@ export const parseScore = (text: string, file = 'score'): ScoreFile => {
         else if (raw.startsWith('|')) {
           if (part.cues.length) throw new Error('bars and cues cannot share a part')
           const bars = line(raw)
+          if (bars.hairpins.length) needs(next(), '"<" and ">"')
           part.notes.push(...bars.notes.map((x) => ({ ...x, at: x.at + part.span })))
+          part.hairpins.push(...bars.hairpins.map((x) => ({ ...x, at: x.at + part.span, end: x.end + part.span })))
           part.span += bars.span
         } else {
           if (part.span) throw new Error('bars and cues cannot share a part')
           const parsed = cue(words, isInst)
+          if (parsed.at % 1) needs(next(), `"${words[0]}"`)
           lines.set(parsed, n)
           part.cues.push(parsed)
         }
@@ -319,13 +417,13 @@ export const parseScore = (text: string, file = 'score'): ScoreFile => {
         if (key.length && key[0] !== 'in') throw new Error(`write a key change as "${chords} in E"`)
         if (key.length && p.tonic < 0) throw new Error('give the piece a key before changing it')
         const shift = key.length ? transpose(p.tonic, tonic(header('in', key.slice(1), /^([A-G][#b]?)$/, 'E')[1])) : 0
-        const row: Row = { mark, chords, key: shift, breath: false, cut: false, entries: new Map(), label: dash < 0 ? mark : words.slice(dash + 1).join(' ') }
+        const row: Row = { mark, chords, key: shift, breath: false, cut: false, tempo: [], entries: new Map(), label: dash < 0 ? mark : words.slice(dash + 1).join(' ') }
         p.rows.push(row)
         rowText.set(row, [])
         lines.set(row, n)
       } else if (block === 'form' && indent > 4 && p.rows.length) rowText.get(p.rows[p.rows.length - 1])!.push(raw)
       else if (block === 'variants' && indent === 4) {
-        const variant = variantRow(words)
+        const variant = variantRow(words, next())
         if (p.variants.some((v) => v.name === variant.name)) throw new Error(`there is already a variant "${variant.name}"`)
         p.variants.push(variant)
         lines.set(variant, n)
@@ -333,7 +431,9 @@ export const parseScore = (text: string, file = 'score'): ScoreFile => {
         const { target, ...mix } = mixRow(words)
         lines.set(mix, n)
         p.mix.set(target, mix)
-      } else throw new Error('unexpected line')
+      } else if (block === 'perform' && indent === 4) performRow(words, p.perform!)
+      else if (block === 'perform off') throw new Error('"perform off" takes no rows')
+      else throw new Error('unexpected line')
     } catch (error) {
       fail(n, (error as Error).message)
     }
@@ -346,11 +446,11 @@ export const parseScore = (text: string, file = 'score'): ScoreFile => {
       fail(at, (error as Error).message)
     }
   }
-  for (const p of score.pieces) checkPiece(score, p, rowText, fail)
+  for (const p of score.pieces) checkPiece(score, p, rowText, fail, next())
   return score
 }
 
-const checkPiece = (score: ScoreFile, p: PieceSource, rowText: Map<Row, string[]>, fail: (at: number | undefined, message: string) => never) => {
+const checkPiece = (score: ScoreFile, p: PieceSource, rowText: Map<Row, string[]>, fail: (at: number | undefined, message: string) => never, next: boolean) => {
   const { lines } = score
   const at = lines.get(p)
   if (!p.tempo || p.tonic < 0 || !p.rows.length) fail(at, `piece "${p.id}" needs a tempo, a key and a form`)
@@ -364,16 +464,32 @@ const checkPiece = (score: ScoreFile, p: PieceSource, rowText: Map<Row, string[]
         row[name] = true
         continue
       }
+      try {
+        const mark = tempoMark(item, next)
+        if (mark) {
+          const ramps = (m: TempoMark) => m.kind === 'rit.' || m.kind === 'accel.'
+          if (ramps(mark) && row.tempo.some(ramps)) throw new Error(`${row.mark} already has a ${row.tempo.find(ramps)!.kind}`)
+          row.tempo.push(mark)
+          continue
+        }
+      } catch (error) {
+        fail(lines.get(row), (error as Error).message)
+      }
       if (!isPart(name)) fail(lines.get(row), `"${name}" is not a part`)
       if (row.entries.has(name)) fail(lines.get(row), `${name} is named twice in ${row.mark}`)
       try {
-        row.entries.set(name, entry(opts))
+        row.entries.set(name, entry(opts, next))
       } catch (error) {
         fail(lines.get(row), (error as Error).message)
       }
     }
   }
   if (p.loop?.from && !p.rows.some((r) => r.mark === p.loop!.from)) fail(lines.get(p.rows), `no section "${p.loop.from}" to loop from`)
+  for (const [name, progression] of p.progressions) {
+    if (progression.lengths.every((l) => l === null)) continue
+    const total = progression.lengths.reduce<number>((sum, l) => sum + (l ?? progression.barsPerChord * BAR), 0)
+    if (total % BAR) fail(at, `chord set "${name}" lasts ${total / BAR} bars; make it whole bars`)
+  }
   const sources = new Set([...p.parts.flatMap((x) => (x.doubles ? [x.doubles.source] : [])), ...p.variants.flatMap((v) => v.swaps.map(([to]) => to))])
   for (const x of p.parts) {
     const where = lines.get(x)

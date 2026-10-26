@@ -1,5 +1,6 @@
-import { type AdLibRule, type ScoreEvent, adlibAt, expand, wrap } from './expand.ts'
-import type { Instrument, ScoreFile } from './parse.ts'
+import { type AdLibRule, type HairpinSign, type ScoreEvent, type TempoSign, adlibAt, expand, wrap } from './expand.ts'
+import type { Instrument, Perform, ScoreFile } from './parse.ts'
+import { perform } from './perform.ts'
 import { BAR, type Pedal } from './words.ts'
 
 export const DEFAULT_SEED = 20261024
@@ -15,6 +16,7 @@ export interface RenderOptions {
   variant?: string | null
   seed?: number | null
   passes?: number
+  perform?: boolean
 }
 
 export interface Rendering {
@@ -24,6 +26,10 @@ export interface Rendering {
   piece: { id: string; title: string; index: number; count: number }
   variant: string | null
   tempo: number
+  clock: number[]
+  marks: TempoSign[]
+  hairpins: HairpinSign[]
+  perform: Perform | null
   tonic: number
   mode: string
   keys: { bar: number; tonic: number }[]
@@ -56,12 +62,19 @@ export const render = (score: ScoreFile, id = score.pieces[0]?.id ?? '', options
   }
   const repeats = (pass: number) => (pass * span + piece.bars - loop!.to) * BAR
   const pedals = [...piece.pedals]
+  const marks = [...piece.marks]
+  const hairpins = [...piece.hairpins]
   const sections = piece.sections.map(({ bar, mark, label, tonic }) => ({ bar, mark, label, tonic }))
   for (let pass = 1; pass < passes; pass++) {
     const shift = repeats(pass)
-    pedals.push(...piece.pedals.filter((p) => p.at >= loop!.from * BAR).map((p) => ({ ...p, at: p.at + shift })))
+    const looped = (at: number) => at >= loop!.from * BAR
+    pedals.push(...piece.pedals.filter((p) => looped(p.at)).map((p) => ({ ...p, at: p.at + shift })))
+    marks.push(...piece.marks.filter((m) => looped(m.at)).map((m) => ({ ...m, at: m.at + shift })))
+    hairpins.push(...piece.hairpins.filter((h) => looped(h.at)).map((h) => ({ ...h, at: h.at + shift, end: h.end + shift })))
     sections.push(...sections.filter((s) => s.bar >= loop!.from && s.bar < loop!.to).map((s) => ({ ...s, bar: s.bar + shift / BAR })))
   }
+  const written = { bars, clock: Array.from({ length: bars * BAR }, (_, step) => piece.clock[wrap(piece, step)]), events, sections, perform: piece.perform }
+  const played = options.perform ? perform(written, seeded(options.seed ?? DEFAULT_SEED)) : written
   return {
     title: score.title,
     by: score.by,
@@ -69,13 +82,17 @@ export const render = (score: ScoreFile, id = score.pieces[0]?.id ?? '', options
     piece: { id: piece.id, title: piece.title, index: score.pieces.findIndex((p) => p.id === piece.id), count: score.pieces.length },
     variant: piece.variant,
     tempo: piece.tempo,
+    clock: played.clock,
+    marks,
+    hairpins,
+    perform: piece.perform,
     tonic: piece.tonic,
     mode: piece.mode,
     keys: sections.filter((s, i) => !i || s.tonic !== sections[i - 1].tonic).map((s) => ({ bar: s.bar, tonic: s.tonic })),
     bars,
     sections,
     instruments: score.instruments,
-    events,
+    events: played.events,
     pedals,
     adlibs: piece.adlibs,
   }

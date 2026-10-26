@@ -33,6 +33,11 @@ const track = (events: { tick: number; bytes: number[] }[]) => {
 
 const tick = (eighths: number) => Math.round((eighths * PPQ) / 2)
 
+const tempo = (secondsPerEighth: number) => {
+  const usec = Math.round(secondsPerEighth * 2_000_000)
+  return [0xff, 0x51, 3, (usec >> 16) & 0xff, (usec >> 8) & 0xff, usec & 0xff]
+}
+
 const pedal = (r: Rendering, staff: Staff, channel: number) =>
   r.pedals
     .filter((p) => p.inst === staff.inst)
@@ -43,11 +48,11 @@ const pedal = (r: Rendering, staff: Staff, channel: number) =>
 
 export const toMidi = (r: Rendering) => {
   const { staves, staffOf } = layout(r)
-  const tempo = Math.round(60_000_000 / r.tempo)
   const conductor = track([
     { tick: 0, bytes: text(0x03, r.title) },
-    { tick: 0, bytes: [0xff, 0x51, 3, (tempo >> 16) & 0xff, (tempo >> 8) & 0xff, tempo & 0xff] },
+    { tick: 0, bytes: tempo(r.clock[0] ?? 30 / r.tempo) },
     { tick: 0, bytes: [0xff, 0x58, 4, 4, 2, 24, 8] },
+    ...r.clock.flatMap((seconds, step) => (step && Math.abs(seconds - r.clock[step - 1]) > 1e-9 ? [{ tick: tick(step), bytes: tempo(seconds) }] : [])),
   ])
   const tracks = staves.map((staff, i) => {
     const channel = i >= PERCUSSION ? i + 1 : i
