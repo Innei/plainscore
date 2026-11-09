@@ -1,13 +1,13 @@
-# score 0.2 grammar
+# score 0.3 grammar
 
-A `score 0.1` file still reads and renders exactly as before. Everything marked **0.2** below needs `score 0.2` on the first line.
+A `score 0.1` file still reads and renders exactly as before. Everything marked **0.2** below needs `score 0.2` or later on the first line, and everything marked **0.3** needs `score 0.3`.
 
 A score is a UTF-8 text file. Indentation carries structure: file-level lines start at column 0, a piece's blocks at 2 spaces, block rows at 4, and form entries deeper than 4. Lines starting with `#` are comments. Anything after ` — ` (an em dash between spaces) on a line is a note to the reader and is ignored.
 
 ## File
 
 ```
-score 0.2                       the first line, always (or score 0.1)
+score 0.3                       the first line, always (or score 0.1, 0.2)
 
 title   Small Waltz             optional, file-wide
 by      You                     optional; written as "Music by You"
@@ -148,7 +148,7 @@ One line per entry: `<count> [instrument] <pitches> <duration> [options]`. A cue
   - `form`: plays once.
   - `form loop`: repeats from the top.
   - `form loop from A1`: plays through, then repeats from A1.
-- Each row is `<mark> <chord set> [in <key>]`, then the parts that play, comma-separated.
+- Each row is `<mark> <chord set> [in <key>] [loudness <LUFS>]`, then the parts that play, comma-separated.
 - A part not named in a row is silent there. Every part must play somewhere.
 - Part options:
   - A dynamic.
@@ -164,6 +164,7 @@ One line per entry: `<count> [instrument] <pitches> <duration> [options]`. A cue
 - `breath`: every part but `lead` and `once` parts stops for the last eighth.
 - `cut`: whatever still rings stops at the downbeat.
 - Both also lift the pedal.
+- **0.3** `loudness -15.5`: how loud the section should measure in the finished master, in LUFS. A renderer measures each section with the real sounds and adds the gain it needs. A section without a target keeps the gain of the section before it; sections before the first target take that target's gain. With no targets, sections are not balanced.
 
 ## Variants
 
@@ -186,15 +187,42 @@ All variants share one timeline.
 
 ```
   mix  — playback only; notation and MIDI ignore it
-    violin-theme   +13 dB  attack 200ms
-    piano          75%
+    piano          0 dB    pan 0       send -6 dB
+    melody        +1 dB                               — a part: its gain adds to its instrument's
+    violins       -4 dB    pan -0.35   send -6 dB
+    harp          75%      send off    attack 0ms
 ```
 
-Rows name a part or an instrument.
+Rows name a part or an instrument. Gain is `+3 dB`, `-4 dB`, `0 dB` or a percentage. `attack 200ms` softens note starts.
+
+In 0.3:
+
+- `pan -0.35`: from -1 (left) to 1 (right), equal power.
+- `send -6 dB`: how much goes to the space (reverb); `send off` sends nothing. Unwritten sends are 0 dB.
+- A part row adds its gain to its instrument's and replaces the pan, send and attack it writes.
+
+## Space (0.3)
+
+```
+  space  decay 2.6s  predelay 20ms  damp 6500 Hz  wet -10 dB
+```
+
+One reverb for the whole piece. Unwritten values are decay 2.4s, predelay 20ms, damp 6500 Hz, wet -12 dB. Renderers build its impulse from these four numbers with a fixed seed, so every renderer hears the same room.
+
+## Master (0.3)
+
+```
+  master  -14 LUFS  ceiling -1 dBTP  fade 2.5s
+    lowcut    35 Hz
+    presence  +1 dB                 — a 3 kHz bell
+    air       +2 dB at 9000 Hz      — a high shelf; 9000 Hz when no frequency is written
+```
+
+The first line is the integrated loudness of the finished piece and its true-peak ceiling. `fade` is optional; without it the piece rings out. Unwritten: -14 LUFS, ceiling -1 dBTP, no EQ. Renderers reach the loudness with one fixed gain and a peak limiter, never with dynamic normalisation, so the sections keep their balance.
 
 ## Perform
 
-**0.2** How a pianist would play it: on by default in a `score 0.2` piece, used by `render(…, { perform: true })`, `plainscore midi --perform` and players that call `perform()`. The sheet and the plain MIDI ignore it.
+**0.2** How a pianist would play it: on by default in a `score 0.2` or later piece, used by `render(…, { perform: true })`, `plainscore-render`, `plainscore midi --perform` and players that call `perform()`. The sheet and the plain MIDI ignore it.
 
 ```
   perform  — or "perform off"

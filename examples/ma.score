@@ -1,0 +1,216 @@
+score 0.3
+# 間  Ma — a piano single in D major; strings and a little harp only support, the tune never leaves the piano
+
+title   間  Ma
+by      Innei & Claude
+
+instruments
+  piano    piano
+  violins  violins
+  cello    cello
+  harp     harp
+
+piece ma  間  Ma
+  meter   4/4
+  tempo   q = 100
+  key     D major
+
+  chords intro  — bass | voicing
+    D        D2  | A3 D4 F#4
+    Bm7      B1  | A3 D4 F#4
+    Gmaj7    G2  | B3 D4 F#4
+    Asus4    A1  | A3 D4 E4
+
+  chords verse  — bass | voicing
+    D        D2  | A3 D4 F#4
+    F#m7     F#2 | A3 C#4 E4
+    Gmaj7    G2  | B3 D4 F#4
+    A        A1  | A3 C#4 E4
+    Bm7      B1  | A3 D4 F#4
+    G        G2  | B3 D4 G4
+    Em7      E2  | B3 D4 G4
+    A        A1  | A3 C#4 E4
+
+  chords bridge  — Gm is borrowed from D minor, the one shadow in the piece
+    G        G2  | B3 D4 G4
+    A        A1  | A3 C#4 E4
+    F#m      F#2 | A3 C#4 F#4
+    Bm       B1  | B3 D4 F#4
+    Gm       G2  | Bb3 D4 G4
+    D/F#     F#2 | A3 D4 F#4
+    Em7      E2  | B3 D4 G4
+    A7       A1  | G3 C#4 E4
+
+  chords outro  — A to D, a real cadence before the last chord
+    D        D2  | A3 D4 F#4
+    Bm7      B1  | A3 D4 F#4
+    Gmaj7    G2  | B3 D4 F#4
+    Em7      E2  | B3 D4 G4
+    A        A1  | A3 C#4 E4
+    D        D2  | A3 D4 F#4
+
+  chords second  — bass | voicing
+    Gmaj7    G2  | B3 D4 F#4
+    A/G      G2  | A3 C#4 E4
+    F#m7     F#2 | A3 C#4 E4
+    Bm7      B1  | A3 D4 F#4
+    Em7      E2  | B3 D4 G4
+    F#m7     F#2 | A3 C#4 E4
+    Gmaj7    G2  | B3 D4 F#4
+    Asus4    A1  | A3 D4 E4
+
+  chords turn
+    G        G2  | B3 D4 G4
+    A        A1  | A3 C#4 E4
+    Bm       B1  | B3 D4 F#4
+    B7       B1  | A3 D#4 F#4
+
+  part melody  piano  mp  overlap q  lead  — every phrase opens on an eighth of silence
+    | r e   A4 e   D5 e   E5 e   F#5 h       | E5 q.   C#5 e   A4 h                 | r e   B4 e   D5 e   F#5 e   A5 q.   G5 e | E5 h.   r q            |
+    | F#5 e   E5 e   D5 e   F#5 e   B5 q.   A5 e | G5 q.   F#5 e   D5 h          | E5 e   F#5 e   G5 e   B5 e   A5 q   G5 q  | E5 h   C#5 q   r q     |
+
+  part melody2  piano  mp  overlap q  lead  — A3: the same tune, reaching D6 and running through bar 7
+    | r e   A4 e   D5 e   E5 e   F#5 q.   A5 e | E5 e   F#5 e   E5 e   C#5 e   A4 h | r e   B4 e   D5 e   F#5 e   B5 q   A5 e   G5 e | E5 q.   F#5 e   E5 h |
+    | F#5 e   E5 e   D5 e   F#5 e   D6 q.   B5 e | A5 q.   G5 e   D5 h | E5 e   F#5 e   G5 e   B5 e   A5 e   G5 e   F#5 e   E5 e | E5 h   C#5 q   r q |
+
+  part lift  piano  mf  overlap q  lead
+    | D5 e   G5 e   B5 h.        | A5 q.   E5 e   C#5 h       | C#5 e   E5 e   A5 q   F#5 h          | B5 q.   A5 e   F#5 e   E5 e   D5 q |
+    | Bb5 h.   A5 e   G5 e       | F#5 h   A5 q   D6 q        | E6 q.   D6 e   B5 q   G5 q           | G5 q   E5 q   C#5 h             |
+
+  part quote  piano  p  overlap q  lead
+    | r w | r w | r w | r h   A4 e   D5 e   E5 q |
+
+  part coda  piano  mp  overlap q  lead  — picks up where A4 left the tune, an octave up, and walks it home
+    | r e   A5 e   D6 e   E6 e   F#6 q   E6 q | D6 q.   B5 e   A5 q   F#5 q | G5 e   A5 e   B5 q   A5 q   F#5 q | E5 q.   F#5 e   G5 q   B5 q |
+    | A5 q.   G5 e   E5 q   C#5 q | D5 w |
+
+  part theme2  piano  mp  overlap q  lead  — a second tune that starts on the IV, longer breaths than the first
+    | B5 q.   A5 e   F#5 q   D5 q | E5 q.   F#5 e   E5 q   C#5 q | A5 q.   C#6 e   B5 q   A5 q | F#5 h.   r q |
+    | G5 q.   F#5 e   E5 q   B4 q | C#5 q   E5 q   A5 q   F#5 q | B5 q.   A5 e   G5 q   F#5 q | E5 h   D5 q   r q |
+
+  part echo  piano  p  overlap q  lead
+    | r h   A5 e   D6 e   E6 e   F#6 e | E6 h   C#6 h | r h   B5 e   D6 e   F#6 e   A6 e | E6 w |
+    | r h   F#5 e   A5 e   B5 e   D6 e | B5 h   G5 h  | r h   E5 e   G5 e   B5 e   D6 e  | C#6 h.   r q |
+
+  part rise  piano  mf  overlap q  lead
+    | D5 q   G5 q   B5 h | C#6 q   A5 q   E5 h | D5 q   F#5 q   B5 h | D#6 h.   r q |
+
+  part vline  violins  p  — the violins' own line under the bridge, moving where the piano holds
+    | G4 h.   A4 q | C#5 h   E5 q   C#5 q | A4 h.   C#5 q | D5 h   C#5 q   B4 q |
+    | D5 h   Bb4 h | A4 h   F#4 q   A4 q | G4 q   B4 q   D5 h | C#5 w |
+
+  part vline-cello  cello  doubles vline 8vb  mf
+
+  part cello-low  cello  — the floor the piano's left hand cannot hold
+    1     bass+8va    w+s
+
+  part harp-intro  harp  once  p  — one rolled chord where the opening reaches Gmaj7
+    3.1   G4 B4 D5 F#5 A5 D6   h.  roll s
+
+  part harp-wash  harp  once  mp  — marks the arrival a step higher
+    1.1   D4 F#4 A4 D5 F#5 A5 D6   h.  roll s
+
+  part sparkle  harp  ad lib.
+    chance   18%
+    notes    D major, D5 to D6, 8va 40% of the time
+    dynamic  pppp-pp
+    length   h.
+    timing   anywhere within the eighth
+    avoid    echo
+
+  part pickup  piano  mp  — a two-note lead-in on the last beat
+    | r w | r w | r w | r w | r w | r w | r w | r h   r q   A4 e   B4 e |
+
+  part fall  piano  p  — A3 steps down into the interlude
+    | r w | r w | r w | r w | r w | r w | r w | r h   r e   A5 e   E5 e   C#5 e |
+
+  part counter2  cello  mp  — C2 hands the slow line to the cello
+    | D4 w | C#4 w | C#4 w | D4 w | B3 w | A3 w | B3 h   D4 h | E4 w |
+
+  part counter  violins  p  — a slow line under the tune
+    | F#4 w | E4 w | D4 w | C#4 w | D4 w | B3 w | B3 h   D4 h | C#4 w |
+
+  part flow  piano  — eighths keep it moving under a soft tune
+    1     bass        q.
+    1&    bass+5th    e   soft
+    2     bass+8va    e   soft
+    2&    t2          e   softer
+    3     t3          q   soft
+    3&    t2          e   softer
+    4     bass+5th    e   soft
+    4&    t1          e   softer
+
+  part walk  piano  — quarter notes with room between them, for the quiet first statements
+    1     bass        h   soft
+    2&    upper       q   softer  roll 25ms
+    3     bass+8va    q   softer
+    4     t3          q   softer
+
+  part pulse  piano  — off-beat chords that push the bridge forward
+    1     bass        q.
+    1     upper       e   soft
+    2&    upper       e   softer
+    3&    bass+8va    e   soft
+    4     upper       e   softer
+
+  part drift  piano  — the interlude: rolled chords high up, no pulse
+    1     bass                       w   softer
+    1     t1+8va  t2+8va  t3+8va     h   softer  roll 60ms
+    3     t1+8va  t2+8va  t3+8va     h   softer  roll 90ms
+
+  part twinkle  piano  overlap q  — the opening: single notes high up, each bar a different shape
+    | F#5 e   A5 e   D6 q   A5 q.   F#5 e | B5 q.   F#5 e   D5 e   F#5 e   A5 q | G5 e   B5 e   D6 e   F#6 e   E6 h | D6 h   r h |
+
+  part low  piano
+    1     bass        w   softer
+
+  part last  piano
+    1     bass        w   soft
+    1     upper       w   soft    roll 80ms
+
+  part violin-pad  violins  p
+    1     t2+8va      w+s   late 40ms
+    1     top+8va     w+s   late 75ms
+
+  part pedal
+    1     Ped.
+
+  form
+    Intro  intro  loudness -17.9
+      twinkle mf 90%, low mp bars 3-4, quote mp, violin-pad pp 70% bars 3-4, harp-intro, pedal
+    A1  verse  loudness -15.4
+      walk mf, melody mf, cello-low pp bars 7-8, pedal
+    A2  verse  loudness -14.8
+      flow p, melody, counter, cello-low p 80%, pickup, pedal
+    B1  bridge  loudness -13.9
+      pulse mp, lift, violin-pad, cello-low p, pedal
+    A3  verse  loudness -13.4
+      flow mp, melody2 mf, counter mp, violin-pad 70%, cello-low mp, fall, pedal
+    Interlude  verse  loudness -15.3  — the piano alone, answering itself up high
+      flow mp 90%-60% bars 1-3, drift mf bars 2-8, echo mf, violin-pad mp 80%-60%, cello-low p 80%-60%, sparkle, pedal
+    C1  second  loudness -16.0
+      walk mf, theme2 mf, violin-pad mp 60%, cello-low pp 60%, pickup p, pedal
+    C2  second  loudness -13.7
+      flow mp 90%, theme2 mf, counter2, violin-pad 70%, pickup, pedal
+    B2  bridge  loudness -13.4
+      pulse mp, lift f, vline mp, violin-pad p, cello-low mp, pedal
+    A4  verse  loudness -13.2
+      flow mp, melody mf 8va, counter mp, violin-pad, cello-low mp, pickup, pedal
+    Turn  turn  loudness -15.2  — climbs to B7 so the last pages can sit a step higher
+      flow mf 85% bars 1-3 on 1 and 3, low mp bars 4-4, rise f, violin-pad mp 60%-100%, cello-low mp 60%-100%, pedal
+    A5  verse in E  loudness -12.5
+      flow mp, melody f, counter mp, violin-pad mp, cello-low mf, harp-wash, pedal
+    B3  bridge in E  loudness -11.9  — the fullest page: both patterns, the violin line doubled by the cello
+      pulse mf, flow p 70%, lift f, vline mf, vline-cello, violin-pad mf, pedal
+    Outro  outro in E  loudness -16.3
+      flow mf 90%-60% bars 1-5, last mf bars 6-6, coda mf, violin-pad mp 85%-50%, cello-low mp 85%-50%, harp-wash p, pedal
+
+  mix
+    violins  75%
+    cello    85%
+    harp     90%
+
+  space  decay 2.6s  predelay 20ms  damp 6500 Hz  wet -10 dB
+
+  master  -14 LUFS  ceiling -1.2 dBTP  fade 2.5s
+    air  +2 dB at 9000 Hz

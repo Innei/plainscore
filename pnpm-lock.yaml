@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  stb-vorbis: 0.0.7
+
 importers:
 
   .:
@@ -17,6 +20,22 @@ importers:
       vitest:
         specifier: 3.2.4
         version: 3.2.4(@types/node@24.19.2)
+
+  packages/render:
+    dependencies:
+      plainscore:
+        specifier: workspace:^
+        version: link:../..
+      spessasynth_core:
+        specifier: 4.4.9
+        version: 4.4.9
+    devDependencies:
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
 
 packages:
 
@@ -407,6 +426,9 @@ packages:
       picomatch:
         optional: true
 
+  fflate@0.8.3:
+    resolution: {integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==}
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -459,8 +481,15 @@ packages:
     resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
 
+  spessasynth_core@4.4.9:
+    resolution: {integrity: sha512-XukwmKvjQziCvjDdL0XAye1wg6FygDl3rdOGEO3WIwFQownVJybgbjZiH42ryG0fZSKWLVK3RHmD7SSNpn9WyA==}
+
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
+
+  stb-vorbis@0.0.7:
+    resolution: {integrity: sha512-OsD8Vm9EcStsiYGUBSqJ88gBPwDYR1Uv57bV/KZhu6Li1kzjm0fO+iiTkm79bZ1L2I/z6IrA1wkWHu3xQYY7Hw==}
+    engines: {node: '>=18'}
 
   std-env@3.10.0:
     resolution: {integrity: sha512-5GS12FdOZNliM5mAOxFRg7Ir0pWz8MdpYm6AY6VPkGpbA7ZzmbzNcBJQ0GPvvyWgcY7QAhCgf9Uy89I03faLkg==}
@@ -856,6 +885,8 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.7
 
+  fflate@0.8.3: {}
+
   fsevents@2.3.3:
     optional: true
 
@@ -921,7 +952,14 @@ snapshots:
 
   source-map-js@1.2.2: {}
 
+  spessasynth_core@4.4.9:
+    dependencies:
+      fflate: 0.8.3
+      stb-vorbis: 0.0.7
+
   stackback@0.0.2: {}
+
+  stb-vorbis@0.0.7: {}
 
   std-env@3.10.0: {}
 

@@ -1,6 +1,6 @@
 {
   "name": "plainscore",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A plain-text score format a musician can read and an AI can edit, with MIDI and ABC export.",
   "license": "MIT",
   "repository": {
@@ -37,8 +37,8 @@
     "llms.txt"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json && pnpm -C packages/render build",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/render",
     "test": "vitest run",
     "prepare": "tsc -p tsconfig.build.json"
   },

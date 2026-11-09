@@ -10,7 +10,7 @@
 <summary><code>song.score</code> as text</summary>
 
 ```
-score 0.1
+score 0.2
 
 title   Evening Song
 by      You
@@ -59,11 +59,12 @@ piece song  Evening Song
 - API: `render(parseScore(text, file), piece, { variant, seed })`, then `toAbc(r)` or `toMidi(r)`.
 - Staves follow `instruments`. The family (`piano harp violins violas cello bass flute oboe clarinet bassoon horn trumpet voice synth`) sets clef, MIDI program and pedal. A piano `lead` gets a Melody staff; `pizz.` gets its own staff.
 - New in 0.2: sixteenth counts, chords shorter than a bar, hairpins, rit./accel./a tempo/fermata, and a `perform` block that shapes timing and touch like a pianist.
+- New in 0.3: `pan` and `send` in the mix, a `space` (reverb) and a `master` block, and a `loudness` target per section, rendered by `plainscore-render`.
 - Not yet: meters other than 4/4, tuplets, ties across barlines, repeats with endings, imports, percussion.
 
 ## Docs
 
-- [Grammar](docs/grammar.md): every keyword of score 0.1, with examples
+- [Grammar](docs/grammar.md): every keyword of score 0.3, with examples
 - [Legend](src/legend.ts): the legend a score can carry so readers need no docs; `plainscore legend`
 - [llms.txt](llms.txt): this index, for agents
 
@@ -71,6 +72,7 @@ piece song  Evening Song
 
 - [bgm.score](examples/bgm.score): two pieces with variants, loop, ad lib. and mix
 - [road.score](examples/road.score): a full single for piano, harp and strings
+- [ma.score](examples/ma.score): 間 Ma, a piano single in D with strings and harp, mixed and mastered in the score; `npx plainscore-render render examples/ma.score --sounds examples/sounds.json -o examples/out/ma` after putting MuseScore_General.sf3 in `examples/sounds/`
 
 ## API
 
@@ -78,6 +80,7 @@ piece song  Evening Song
 - [plainscore/abc](src/abc/index.ts): `toAbc(rendering)`, ABC for abcjs 6
 - [plainscore/midi](src/midi.ts): `toMidi(rendering)`, SMF type 1, 480 PPQ, pedal as CC64
 - [plainscore/legend](src/legend.ts): `LEGEND`
+- [plainscore-render](packages/render): `renderOffline`, `liveGraph` and the `render` / `mixer` CLI
 
 ## Optional
 

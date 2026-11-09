@@ -28,3 +28,13 @@ jobs:
         run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
       - run: npm install -g npm@latest
       - run: npm publish
+      - name: Publish the renderer when its version is new
+        working-directory: packages/render
+        run: |
+          name=$(node -p 'require("./package.json").name')
+          version=$(node -p 'require("./package.json").version')
+          if ! npm view "$name" name >/dev/null 2>&1; then echo "$name is not on npm yet: publish its first version by hand, then add this workflow as its trusted publisher"; exit 0; fi
+          if npm view "$name@$version" version >/dev/null 2>&1; then echo "$name@$version is already on npm"; exit 0; fi
+          pnpm build
+          pnpm pack
+          npm publish ./*.tgz

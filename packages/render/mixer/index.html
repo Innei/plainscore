@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>plainscore mixer</title>
+    <link rel="stylesheet" href="/mixer.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="name">
+        <h1 id="title">Loading…</h1>
+        <p id="file" class="muted"></p>
+      </div>
+      <div class="actions">
+        <span id="status" class="badge" hidden></span>
+        <button id="measure" disabled>Measure</button>
+        <details class="export">
+          <summary>Export</summary>
+          <div class="menu">
+            <label><input type="checkbox" value="wav" checked /> WAV 24-bit</label>
+            <label><input type="checkbox" value="flac" /> FLAC</label>
+            <label><input type="checkbox" value="mp3" /> MP3 320k</label>
+            <button id="export">Render files</button>
+            <p id="exported" class="muted small"></p>
+          </div>
+        </details>
+        <button id="write" class="primary" disabled>Write to score…</button>
+      </div>
+    </header>
+
+    <div id="banner" class="banner" hidden></div>
+
+    <section class="transport">
+      <button id="play" class="play" disabled aria-label="Play">▶</button>
+      <span id="clock" class="clock">0:00.0 / 0:00.0</span>
+      <label class="loop"><input id="loop" type="checkbox" /> Loop section</label>
+      <span class="muted small">Space plays and pauses · click a section to jump</span>
+    </section>
+    <div id="timeline" class="timeline"><div id="head" class="head"></div></div>
+
+    <main class="grid">
+      <section class="panel">
+        <h2>Mix</h2>
+        <div id="strips" class="strips"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Space</h2>
+        <div id="space" class="knobs"></div>
+        <h2>Master</h2>
+        <div id="master" class="knobs"></div>
+      </section>
+
+      <section class="panel wide">
+        <h2>Section loudness</h2>
+        <p class="muted small">Targets are LUFS in the finished master. Leave one empty to keep the gain of the section before it. Compensation updates as an estimate until you measure again.</p>
+        <table class="sections">
+          <thead>
+            <tr><th>Section</th><th>Start</th><th>Target</th><th>Comp.</th><th>Measured</th><th>Diff</th><th class="chart-head">−30 … −6 LUFS</th></tr>
+          </thead>
+          <tbody id="sections"></tbody>
+        </table>
+      </section>
+
+      <section class="panel wide">
+        <h2>Report</h2>
+        <dl id="summary" class="summary"></dl>
+        <ul id="seams" class="seams"></ul>
+        <ul id="credits" class="credits muted small"></ul>
+      </section>
+    </main>
+
+    <dialog id="diff">
+      <h2>Write to <span id="diff-file"></span></h2>
+      <p class="muted small">Only the mix, space and master blocks and section loudness change; every other character stays.</p>
+      <pre id="diff-lines"></pre>
+      <p id="diff-error" class="error" hidden></p>
+      <form method="dialog" class="dialog-actions">
+        <button value="cancel">Cancel</button>
+        <button id="confirm" class="primary" value="write">Write</button>
+      </form>
+    </dialog>
+
+    <script type="module" src="/mixer.js"></script>
+  </body>
+</html>

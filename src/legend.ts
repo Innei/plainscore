@@ -1,4 +1,4 @@
-export const LEGEND = `# Legend (score 0.2)
+export const LEGEND = `# Legend (score 0.3)
 #   Pitches sound as written. Durations w h q e s, "." dotted, "+" ties (w+s), r = rest.
 #   Counts 1 e & a 2 e & a …; "2.3&" = bar 2 of the chord (or of the section, in a "once" part).
 #   A chord row may end with its length ("A/G  h"); then cue parts repeat every bar.
@@ -19,6 +19,9 @@ export const LEGEND = `# Legend (score 0.2)
 #     "rit. from 7.3 to q = 66" / "accel. …" ramp to the row's end; "a tempo"; "fermata 8.3".
 #   form loop / loop from A1: the form repeats, from the top or from A1.
 #   Variants edit every form row: "drop P", "Q for P", "P <options>".
-#   mix: playback balance only. perform: how a player shapes time and touch; notation ignores it.
+#   mix: playback balance only: "+3 dB", "75%", "attack 200ms"; 0.3 adds "pan -0.3" and "send -6 dB" / "send off".
+#   perform: how a player shapes time and touch; notation ignores it.
+#   space (0.3): decay 2.4s predelay 20ms damp 6500 Hz wet -12 dB. master (0.3): -14 LUFS ceiling -1 dBTP [fade 2.5s],
+#     rows lowcut 35 Hz, presence +1 dB, air +2 dB at 9000 Hz. Form row "loudness -16" (0.3): the section's target in the master.
 #   Text after "—" is a note to the reader.
 `

@@ -32,6 +32,7 @@ export interface ExpandedSection {
   bar: number
   bars: number
   tonic: number
+  loudness: number | null
   voices: Voice[]
 }
 
@@ -254,7 +255,7 @@ export const expand = (score: ScoreFile, id: string, variant: string | null = nu
           )
         }
     }
-    sections.push({ mark: row.mark, label: row.label, bar, bars, tonic: (piece.tonic + row.key + 12) % 12, voices: [...voices.values()] })
+    sections.push({ mark: row.mark, label: row.label, bar, bars, tonic: (piece.tonic + row.key + 12) % 12, loudness: row.loudness, voices: [...voices.values()] })
   }
   const total = chords.length
   const loopFrom = piece.loop && sections.find((s) => s.mark === (piece.loop!.from ?? sections[0].mark))!.bar

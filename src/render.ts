@@ -1,4 +1,5 @@
 import { type AdLibRule, type HairpinSign, type ScoreEvent, type TempoSign, adlibAt, expand, wrap } from './expand.ts'
+import { DEFAULT_MASTER, DEFAULT_SPACE, type Master, type Mix, type Space, resolveMix } from './mixing.ts'
 import type { Instrument, Perform, ScoreFile } from './parse.ts'
 import { perform } from './perform.ts'
 import { BAR, type Pedal } from './words.ts'
@@ -34,15 +35,19 @@ export interface Rendering {
   mode: string
   keys: { bar: number; tonic: number }[]
   bars: number
-  sections: { bar: number; mark: string; label: string; tonic: number }[]
+  sections: { bar: number; mark: string; label: string; tonic: number; loudness: number | null }[]
   instruments: Instrument[]
   events: ScoreEvent[]
   pedals: Pedal[]
   adlibs: AdLibRule[]
+  mix: Mix
+  space: Space
+  master: Master
 }
 
 export const render = (score: ScoreFile, id = score.pieces[0]?.id ?? '', options: RenderOptions = {}): Rendering => {
   const piece = expand(score, id, options.variant ?? null)
+  const source = score.pieces.find((p) => p.id === piece.id)!
   const loop = piece.loop
   const passes = loop ? Math.max(1, Math.floor(options.passes ?? 1)) : 1
   const span = loop ? loop.to - loop.from : 0
@@ -64,7 +69,7 @@ export const render = (score: ScoreFile, id = score.pieces[0]?.id ?? '', options
   const pedals = [...piece.pedals]
   const marks = [...piece.marks]
   const hairpins = [...piece.hairpins]
-  const sections = piece.sections.map(({ bar, mark, label, tonic }) => ({ bar, mark, label, tonic }))
+  const sections = piece.sections.map(({ bar, mark, label, tonic, loudness }) => ({ bar, mark, label, tonic, loudness }))
   for (let pass = 1; pass < passes; pass++) {
     const shift = repeats(pass)
     const looped = (at: number) => at >= loop!.from * BAR
@@ -95,5 +100,8 @@ export const render = (score: ScoreFile, id = score.pieces[0]?.id ?? '', options
     events: played.events,
     pedals,
     adlibs: piece.adlibs,
+    mix: resolveMix(score, source, events),
+    space: { ...(source.space ?? DEFAULT_SPACE) },
+    master: { ...(source.master ?? DEFAULT_MASTER) },
   }
 }

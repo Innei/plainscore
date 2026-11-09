@@ -32,7 +32,7 @@ describe('plainscore cli', () => {
   })
 
   it('prints the legend', () => {
-    expect(cli('legend').stdout).toMatch(/^# Legend \(score 0\.2\)/)
+    expect(cli('legend').stdout).toMatch(/^# Legend \(score 0\.3\)/)
   })
 
   it('fails with the file and line', () => {
@@ -40,6 +40,6 @@ describe('plainscore cli', () => {
     writeFileSync(file, 'score 0.9\n')
     const run = cli('check', file)
     expect(run.status).toBe(1)
-    expect(run.stderr).toContain('bad.score line 1: start the file with "score 0.2"')
+    expect(run.stderr).toContain('bad.score line 1: start the file with "score 0.3"')
   })
 })

@@ -1,0 +1,39 @@
+{
+  "name": "plainscore-render",
+  "version": "0.1.0",
+  "description": "Render a plainscore .score to a mastered WAV: stems, mix, space, section loudness and a true-peak limiter, the same in Node and the browser.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Innei/plainscore.git",
+    "directory": "packages/render"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "plainscore-render": "./dist/node/bin.js"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./live": "./dist/live.js",
+    "./node": "./dist/node/index.js"
+  },
+  "files": [
+    "dist",
+    "mixer"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "plainscore": "workspace:^",
+    "spessasynth_core": "4.4.9"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "5.9.3"
+  }
+}

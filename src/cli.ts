@@ -13,9 +13,23 @@ const USAGE = `usage:
   plainscore events <file> [--piece id] [--variant v] [--seed n] [--passes n] [--perform]
   plainscore abc <file> [--piece id] [--variant v]
   plainscore midi <file> [--piece id] [--variant v] [--seed n] [--passes n] [--perform] -o out.mid
-  plainscore legend`
+  plainscore legend
+  plainscore render | mixer …    with plainscore-render installed`
 
-const main = () => {
+const RENDERER = 'plainscore-render/node'
+
+const forward = async (args: string[]) => {
+  let renderer: { main: (argv: string[]) => Promise<unknown> }
+  try {
+    renderer = await import(RENDERER)
+  } catch {
+    throw new Error(`${args[0]} needs plainscore-render; install it next to plainscore`)
+  }
+  await renderer.main(args)
+}
+
+const main = async () => {
+  if (process.argv[2] === 'render' || process.argv[2] === 'mixer') return forward(process.argv.slice(2))
   const { positionals, values } = parseArgs({
     allowPositionals: true,
     options: {
@@ -50,9 +64,7 @@ const main = () => {
   writeFileSync(values.output, toMidi(rendering))
 }
 
-try {
-  main()
-} catch (error) {
-  console.error((error as Error).message)
+main().catch((error: Error) => {
+  console.error(error.message)
   process.exit(1)
-}
+})
