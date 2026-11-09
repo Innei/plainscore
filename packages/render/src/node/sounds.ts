@@ -1,8 +1,8 @@
-import { execFileSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
-import { dirname, extname, resolve } from 'node:path'
+import { basename, dirname, extname, resolve } from 'node:path'
 import { decodeWav } from '../dsp/wav.ts'
 import type { SoundSource, Sounds } from '../sources/types.ts'
+import { ffmpeg } from './ffmpeg.ts'
 
 interface Entry {
   soundfont?: string
@@ -29,7 +29,7 @@ const read = async (path: string) => {
 export const decodeAudio = async (path: string) => {
   if (extname(path).toLowerCase() === '.wav') return decodeWav(new Uint8Array(await read(path)))
   await read(path)
-  const raw = execFileSync('ffmpeg', ['-v', 'error', '-i', path, '-f', 'f32le', '-ac', '2', '-ar', String(DECODE_RATE), '-'], { maxBuffer: 2 ** 31 - 1 })
+  const raw = ffmpeg(['-v', 'error', '-i', path, '-f', 'f32le', '-ac', '2', '-ar', String(DECODE_RATE), '-'], `reading ${basename(path)}`, { maxBuffer: 2 ** 31 - 1 })
   const all = new Float32Array(raw.buffer, raw.byteOffset, raw.byteLength / 4)
   const n = all.length / 2
   const channels = [new Float32Array(n), new Float32Array(n)]

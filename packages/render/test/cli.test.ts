@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { decodeWav, encodeWav } from '../src/dsp/wav.ts'
 import { main } from '../src/node/cli.ts'
+import { encodeWith } from '../src/node/encode.ts'
 import { loadSounds } from '../src/node/sounds.ts'
 
 const rate = 48000
@@ -87,6 +88,16 @@ describe('plainscore render', () => {
     const tags = execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format_tags=title,artist', '-of', 'json', `${out}.mp3`], { encoding: 'utf8' })
     expect(JSON.parse(tags).format.tags).toMatchObject({ title: 'Little', artist: 'Tester' })
     expect(existsSync(`${out}.flac`)).toBe(true)
+  })
+
+  it('asks for ffmpeg when it is not on the PATH', () => {
+    const path = process.env.PATH
+    process.env.PATH = mkdtempSync(join(tmpdir(), 'no-ffmpeg-'))
+    try {
+      expect(() => encodeWith('in.wav', 'out.mp3', { title: 'x', artist: '' }, 'mp3')).toThrow('--mp3 needs ffmpeg on the PATH')
+    } finally {
+      process.env.PATH = path
+    }
   })
 
   it('explains its usage', async () => {
