@@ -4,12 +4,11 @@ import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { type IncomingMessage, type ServerResponse, createServer } from 'node:http'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { DEFAULT_SEED, type Rendering, type ScoreEdits, type ScoreFile, checkScore, readEdits, render, rewriteScore } from 'plainscore'
+import { rewriteScore } from 'plainscore'
 import { encodeWav } from '../dsp/wav.ts'
-import { type Overrides, RATE, credits, masterStems, sectionSpans } from '../offline.ts'
-import type { Report } from '../report.ts'
+import { RATE } from '../offline.ts'
+import { createSession } from '../session.ts'
 import type { Sounds } from '../sources/types.ts'
-import { type Stem, renderStems, stemTarget, timeline } from '../stems.ts'
 import { encodeWith } from './encode.ts'
 
 export interface MixerOptions {
@@ -57,31 +56,6 @@ const TYPES: Record<string, string> = {
 }
 const UNBUILT = 'The mixer page is not built. Run `pnpm build` in packages/render, then start the mixer again.'
 
-export type Curve = { step: number; window: number; values: number[] }
-
-const merge = (spans: [number, number][], gap = 0.25) => {
-  const sorted = [...spans].sort((a, b) => a[0] - b[0])
-  const out: [number, number][] = []
-  for (const [a, b] of sorted) {
-    const last = out.at(-1)
-    if (last && a <= last[1] + gap) last[1] = Math.max(last[1], b)
-    else out.push([a, b])
-  }
-  return out.map(([a, b]) => [Math.round(a * 100) / 100, Math.round(b * 100) / 100] as [number, number])
-}
-
-interface State {
-  text: string
-  score: ScoreFile
-  rendering: Rendering
-  stems: Stem[]
-  credits: Report['credits']
-  report: Report
-  curve: Curve
-  version: number
-  wavs: Map<number, Uint8Array>
-}
-
 const body = async (req: IncomingMessage) => {
   const chunks: Buffer[] = []
   for await (const c of req) chunks.push(c as Buffer)
@@ -97,73 +71,25 @@ export const startMixer = async (options: MixerOptions) => {
   const file = resolve(options.file)
   const page = resolve(options.page ?? PAGE)
   const out = options.out ?? join(dirname(file), 'out', basename(file, extname(file)))
-  const renderOf = (score: ScoreFile) => render(score, options.piece, { variant: options.variant, seed: DEFAULT_SEED, perform: true })
-
-  const load = async (text: string, version: number, keepStems?: Stem[]): Promise<State> => {
-    const score = checkScore(text, basename(file))
-    const rendering = renderOf(score)
-    const stems = keepStems ?? (await renderStems(rendering, options.sounds, RATE)).stems
-    const credit = await credits(rendering, options.sounds)
-    const { report, curve } = masterStems(stems, rendering, RATE, { credits: credit })
-    return { text, score, rendering, stems, credits: credit, report, curve, version, wavs: new Map() }
-  }
-
-  let state = await load(await readFile(file, 'utf8'), 1)
+  const session = await createSession({ text: await readFile(file, 'utf8'), name: basename(file), piece: options.piece, variant: options.variant, sounds: options.sounds })
+  let wavs = new Map<number, Uint8Array>()
   const listeners = new Set<ServerResponse>()
   const emit = (event: string, data: unknown) => {
     for (const res of listeners) res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
   }
 
-  const overridesOf = (edits: ScoreEdits): Overrides => {
-    const r = renderOf(checkScore(rewriteScore(state.text, options.piece, edits), basename(file)))
-    return { mix: r.mix, space: r.space, master: r.master, loudness: Object.fromEntries(r.sections.map((s) => [s.mark, s.loudness])) }
-  }
-
-  const describe = () => {
-    const r = state.rendering
-    const spans = sectionSpans(r, state.stems[0]?.channels[0].length / RATE || 0)
-    const at = timeline(r)
-    const sounding = r.events.map((e) => ({ part: e.part, target: stemTarget(r, e), start: at(e.step + e.offset), end: at(e.step + e.offset + e.length) }))
-    const partInst = Object.fromEntries(
-      Object.keys(r.mix.parts).map((p) => [p, [...new Set(r.events.filter((e) => e.part === p).map((e) => e.inst))].join(' ')]),
-    )
-    return {
-      file,
-      version: state.version,
-      title: r.title,
-      piece: r.piece,
-      variant: r.variant,
-      tempo: r.tempo,
-      bars: r.bars,
-      sections: r.sections.map((s, i) => ({
-        mark: s.mark,
-        label: s.label,
-        start: spans[i].start,
-        end: spans[i].end,
-        tonic: s.tonic,
-        keyChange: s.tonic !== r.tonic,
-        parts: [...new Set(sounding.filter((e) => e.start < spans[i].end && e.end > spans[i].start).map((e) => e.part))].sort(),
-      })),
-      stems: state.stems.map((s, i) => ({ index: i, target: s.target, kind: s.kind, insts: s.insts })),
-      edits: readEdits(state.score, options.piece),
-      mix: r.mix,
-      partInst,
-      report: state.report,
-      curve: state.curve,
-      lanes: state.stems.map((st) => ({ target: st.target, spans: merge(sounding.filter((e) => e.target === st.target).map((e) => [e.start, e.end])) })),
-      text: state.text,
-    }
-  }
+  const describe = () => ({ file, ...session.describe() })
 
   let watcher: FSWatcher | null = null
   let timer: ReturnType<typeof setTimeout> | null = null
   const reload = async () => {
     const text = await readFile(file, 'utf8').catch(() => null)
-    if (text === null || text === state.text) return
+    if (text === null || text === session.text) return
     emit('changed', { file })
     try {
-      state = await load(text, state.version + 1)
-      emit('ready', { version: state.version })
+      await session.apply(text, false)
+      wavs = new Map()
+      emit('ready', { version: session.version })
     } catch (error) {
       emit('failed', { error: (error as Error).message })
     }
@@ -177,29 +103,28 @@ export const startMixer = async (options: MixerOptions) => {
     'GET /api/state': async (_, res) => send(res, 200, describe()),
     'POST /api/measure': async (req, res) => {
       const { edits } = await body(req)
-      const { report, curve } = masterStems(state.stems, state.rendering, RATE, { credits: state.credits, overrides: overridesOf(edits) })
-      send(res, 200, { report, curve })
+      send(res, 200, session.measure(edits))
     },
     'POST /api/diff': async (req, res) => {
       const { edits } = await body(req)
-      send(res, 200, { lines: lineDiff(state.text, rewriteScore(state.text, options.piece, edits)) })
+      send(res, 200, { lines: lineDiff(session.text, rewriteScore(session.text, options.piece, edits)) })
     },
     'POST /api/write': async (req, res) => {
       const { edits, version } = await body(req)
       const disk = await readFile(file, 'utf8')
-      if (disk !== state.text || version !== state.version) return send(res, 409, { error: `${basename(file)} changed on disk; reload the mixer before writing` })
-      const text = rewriteScore(state.text, options.piece, edits)
-      checkScore(text, basename(file))
+      if (disk !== session.text || version !== session.version) return send(res, 409, { error: `${basename(file)} changed on disk; reload the mixer before writing` })
+      const text = session.rewrite(edits)
       await writeFile(file, text)
-      state = await load(text, state.version + 1, state.stems)
+      await session.apply(text, true)
+      wavs = new Map()
       send(res, 200, describe())
     },
     'POST /api/export': async (req, res) => {
       const { edits, formats = ['wav'] } = await body(req)
-      const { audio, report, curve } = masterStems(state.stems, state.rendering, RATE, { credits: state.credits, overrides: overridesOf(edits) })
+      const { audio, report, curve } = session.master(edits)
       await mkdir(dirname(out), { recursive: true })
       await writeFile(`${out}.wav`, encodeWav(audio, RATE, 24))
-      const r = state.rendering
+      const r = session.rendering
       const tags = { title: r.title || r.piece.title, artist: r.by }
       const files = [`${out}.wav`]
       for (const f of formats as string[]) {
@@ -225,10 +150,10 @@ export const startMixer = async (options: MixerOptions) => {
       const route = routes[`${req.method} ${url.pathname}`]
       if (route) return await route(req, res)
       const stem = url.pathname.match(/^\/stems\/(\d+)\.wav$/)
-      if (stem && state.stems[Number(stem[1])]) {
+      if (stem && session.stems[Number(stem[1])]) {
         const i = Number(stem[1])
-        if (!state.wavs.has(i)) state.wavs.set(i, encodeWav(state.stems[i].channels, RATE, 16))
-        return send(res, 200, state.wavs.get(i), 'audio/wav')
+        if (!wavs.has(i)) wavs.set(i, encodeWav(session.stems[i].channels, RATE, 16))
+        return send(res, 200, wavs.get(i), 'audio/wav')
       }
       const asset = url.pathname === '/' ? join(page, 'index.html') : resolve(page, `.${url.pathname}`)
       if (!asset.startsWith(page)) return send(res, 404, { error: 'not found' })

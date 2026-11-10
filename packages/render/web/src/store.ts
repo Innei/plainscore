@@ -2,8 +2,6 @@ import { changeCards } from './lib/changes.ts'
 import { estimate } from './lib/estimate.ts'
 import type { Curve, Edits, MixerState, Report, View } from './lib/types.ts'
 
-export type Tab = 'section' | 'mix' | 'space' | 'master' | 'changes'
-
 export interface Banner {
   text: string
   reload?: boolean
@@ -17,7 +15,6 @@ export interface Model {
   curve: Curve | null
   stale: boolean
   selected: number
-  tab: Tab
   status: string | null
   banner: Banner | null
   writeError: string | null
@@ -30,7 +27,6 @@ export type Action =
   | { type: 'written'; state: MixerState }
   | { type: 'writeFailed'; error: string }
   | { type: 'select'; index: number }
-  | { type: 'tab'; tab: Tab }
   | { type: 'status'; status: string | null }
   | { type: 'banner'; banner: Banner | null }
 
@@ -42,7 +38,6 @@ export const initial: Model = {
   curve: null,
   stale: false,
   selected: 0,
-  tab: 'section',
   status: 'loading…',
   banner: null,
   writeError: null,
@@ -67,13 +62,11 @@ export const reduce = (m: Model, a: Action): Model => {
     case 'measured':
       return settle({ ...m, view: viewOf(a.report), curve: a.curve, measured: structuredClone(a.edits) }, m.edits ?? a.edits)
     case 'written':
-      return { ...reduce(m, { type: 'loaded', state: a.state }), tab: m.tab === 'changes' ? 'section' : m.tab, writeError: null }
+      return { ...reduce(m, { type: 'loaded', state: a.state }), writeError: null }
     case 'writeFailed':
       return { ...m, writeError: a.error }
     case 'select':
       return { ...m, selected: a.index }
-    case 'tab':
-      return { ...m, tab: a.tab }
     case 'status':
       return { ...m, status: a.status }
     case 'banner':

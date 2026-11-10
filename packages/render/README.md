@@ -21,3 +21,14 @@ npx plainscore-render mixer song.score --sounds sounds.json
 ```
 
 From code: `renderOffline(text, sounds)` in Node or the browser (in Node, `loadSounds` from `plainscore-render/node` reads `sounds.json`), and `liveGraph(ctx, rendering)` from `plainscore-render/live` for a WebAudio graph that matches the offline mix.
+
+## The mixer on the web
+
+The same page also builds as a static site that renders in the browser: drop in a `.score`, or open an example, and mix it with a hosted copy of MuseScore_General.sf3. Nothing is uploaded.
+
+```bash
+pnpm -C packages/render site:assets   # downloads the sounds (40 MB) and copies the examples into site-public/
+pnpm -C packages/render dev:site      # or build:site, which writes site/
+```
+
+`.github/workflows/pages.yml` publishes it to GitHub Pages on every push to `main`. The site saves by download, or in place in Chrome and Edge, and exports WAV only.

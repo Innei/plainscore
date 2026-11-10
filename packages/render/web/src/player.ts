@@ -1,3 +1,4 @@
+import type { MixerBackend } from './backend/types.ts'
 import { liveGraph } from '../../src/live.ts'
 import { playPosition, sectionAt } from './lib/position.ts'
 import type { Master, Mix, MixerState, Space } from './lib/types.ts'
@@ -11,9 +12,9 @@ export interface Settings {
 
 export type Player = Awaited<ReturnType<typeof createPlayer>>
 
-export const createPlayer = async (state: MixerState, init: Settings, onChange: () => void) => {
+export const createPlayer = async (state: MixerState, init: Settings, onChange: () => void, backend: Pick<MixerBackend, 'stemAudio'>) => {
   const ctx = new AudioContext({ sampleRate: 48000 })
-  const buffers = await Promise.all(state.stems.map(async (s) => ctx.decodeAudioData(await (await fetch(`/stems/${s.index}.wav`)).arrayBuffer())))
+  const buffers = await Promise.all(state.stems.map((s) => backend.stemAudio(s.index, ctx)))
   const live = liveGraph(ctx, init, { gain: init.gain })
   live.output.connect(ctx.destination)
   const meters = new Map(

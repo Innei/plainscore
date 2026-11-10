@@ -4,10 +4,18 @@ import { defineConfig } from 'vite'
 
 const target = `http://127.0.0.1:${process.env.MIXER_PORT ?? 4747}`
 
-export default defineConfig({
-  root: fileURLToPath(new URL('.', import.meta.url)),
-  plugins: [react()],
-  resolve: { alias: [{ find: /^plainscore$/, replacement: fileURLToPath(new URL('../../../src/index.ts', import.meta.url)) }] },
-  build: { outDir: fileURLToPath(new URL('../mixer', import.meta.url)), emptyOutDir: true, chunkSizeWarningLimit: 2000 },
-  server: { proxy: { '/api': target, '/stems': target } },
+const at = (path: string) => fileURLToPath(new URL(path, import.meta.url))
+
+export default defineConfig(({ mode }) => {
+  const site = mode === 'site'
+  return {
+    root: at('.'),
+    base: site ? '/plainscore/' : '/',
+    publicDir: site ? at('../site-public') : false,
+    plugins: [react()],
+    resolve: { alias: [{ find: /^plainscore$/, replacement: at('../../../src/index.ts') }] },
+    worker: { format: 'es' as const },
+    build: { outDir: at(site ? '../site' : '../mixer'), emptyOutDir: true, chunkSizeWarningLimit: 2000 },
+    server: { proxy: site ? undefined : { '/api': target, '/stems': target } },
+  }
 })

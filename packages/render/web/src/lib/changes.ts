@@ -26,6 +26,8 @@ const sameValue = (a: unknown, b: unknown): boolean => {
 
 const changedFields = <T extends object>(a: T, b: T) => (Object.keys(a) as (keyof T)[]).filter((k) => !sameValue(a[k], b[k])) as string[]
 
+const HEAD_KEYS = ['loudness', 'ceiling', 'fade']
+
 const mixOrder = (state: Pick<MixerState, 'stems'>, edits: Edits) => {
   const written = state.stems.map((s) => s.target)
   return [...new Set([...written, ...Object.keys(edits.mix)])]
@@ -43,7 +45,9 @@ export const changeCards = (state: Pick<MixerState, 'sections' | 'stems' | 'edit
   const space = changedFields(edits.space, was.space)
   if (space.length) cards.push({ id: 'space', kind: 'space', label: `Space · ${space.join(', ')}` })
   const master = changedFields(edits.master, was.master)
-  if (master.length) cards.push({ id: 'master', kind: 'master', label: `Master · ${master.join(', ')}` })
+  const head = master.filter((k) => HEAD_KEYS.includes(k))
+  if (head.length) cards.push({ id: 'master:head', kind: 'master', label: `Master · ${head.join(', ')}` })
+  for (const key of master.filter((k) => !HEAD_KEYS.includes(k))) cards.push({ id: `master:${key}`, kind: 'master', label: `Master · ${key}` })
   return cards
 }
 
@@ -55,10 +59,11 @@ const copyPiece = (from: Edits, into: Edits, id: string): Edits => {
     if (from.mix[key]) next.mix[key] = structuredClone(from.mix[key])
     else delete next.mix[key]
   } else if (kind === 'space') next.space = structuredClone(from.space)
+  else if (kind === 'master' && key === 'head') next.master = { ...next.master, loudness: from.master.loudness, ceiling: from.master.ceiling, fade: from.master.fade }
+  else if (kind === 'master' && key === 'air') next.master.air = from.master.air ? { ...from.master.air } : null
+  else if (kind === 'master' && (key === 'lowcut' || key === 'presence')) next.master = { ...next.master, [key]: from.master[key] }
   else if (kind === 'master') next.master = structuredClone(from.master)
   return next
 }
 
 export const revertChange = (state: Pick<MixerState, 'edits'>, edits: Edits, id: string) => copyPiece(state.edits, edits, id)
-
-export const onlyChange = (state: Pick<MixerState, 'edits'>, edits: Edits, id: string) => copyPiece(edits, state.edits, id)

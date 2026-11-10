@@ -27,13 +27,18 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json && vite build --config web/vite.config.ts",
     "typecheck": "tsc --noEmit && tsc --noEmit -p web",
-    "dev": "vite --config web/vite.config.ts"
+    "dev": "vite --config web/vite.config.ts",
+    "build:site": "vite build --config web/vite.config.ts --mode site",
+    "dev:site": "vite --config web/vite.config.ts --mode site",
+    "site:assets": "node scripts/fetch-sounds.mjs"
   },
   "dependencies": {
     "plainscore": "workspace:^",
     "spessasynth_core": "4.4.9"
   },
   "devDependencies": {
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans": "^5.3.0",
     "@lobehub/fluent-emoji": "^5.0.1",
     "@lobehub/icons": "^6.15.0",
     "@lobehub/ui": "6.15.2",

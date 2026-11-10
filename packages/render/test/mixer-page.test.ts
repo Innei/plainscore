@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { build } from 'vite'
@@ -66,6 +66,12 @@ describe('mixer page', () => {
     expect(js.status).toBe(200)
     expect(js.headers.get('content-type')).toContain('javascript')
     expect((await js.text()).length).toBeGreaterThan(10_000)
+  })
+
+  it('builds the local page without the worker or landing code of the site', () => {
+    const assets = readdirSync(join(page, 'assets'))
+    expect(assets.filter((f) => /worker|SiteApp|Landing/i.test(f))).toEqual([])
+    expect(assets.some((f) => f.endsWith('.js'))).toBe(true)
   })
 
   it('writes three edits as exactly three changed lines', async () => {

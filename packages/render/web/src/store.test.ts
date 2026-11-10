@@ -62,16 +62,16 @@ describe('mixer store', () => {
     expect(m.stale).toBe(false)
   })
 
-  it('resets the edits to the new state after a write and leaves the Changes tab', () => {
+  it('resets the edits to the new state after a write', () => {
     const e = baseEdits()
     e.loudness.A = -15
-    let m = reduce(reduce(loaded(), { type: 'edit', edits: e }), { type: 'tab', tab: 'changes' })
+    let m = reduce(loaded(), { type: 'edit', edits: e })
     const next = { ...baseState(), version: 2, edits: e }
     m = reduce(reduce(m, { type: 'writeFailed', error: 'x' }), { type: 'written', state: next })
     expect(m.state!.version).toBe(2)
     expect(m.edits).toEqual(e)
     expect(m.writeError).toBe(null)
-    expect(m.tab).toBe('section')
+    expect('tab' in m).toBe(false)
   })
 
   it('keeps edits when a write fails', () => {

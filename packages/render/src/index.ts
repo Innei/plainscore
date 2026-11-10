@@ -12,3 +12,4 @@ export { type Report, type SeamWarning, type SectionReport, formatReport, seamCh
 export { spriteMidi } from './sources/sampler.ts'
 export type { SampleSource, SoundSource, Sounds, SoundfontSource } from './sources/types.ts'
 export { type Stem, TAIL, renderStems, soundKey, stemTarget } from './stems.ts'
+export { type Curve, type Session, type SessionOptions, type SessionProgress, type SessionState, createSession, inspectScore, planScore } from './session.ts'

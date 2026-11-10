@@ -7,6 +7,10 @@ const round = (v: number) => Math.round(v * 10) / 10
 
 export const yOf = (lufs: number, height: number) => round(height - ((Math.max(LO, Math.min(HI, lufs)) - LO) / (HI - LO)) * height)
 
+export const lufsAt = (y: number, height: number) => Math.max(LO, Math.min(HI, Math.round((LO + ((height - y) / (height || 1)) * (HI - LO)) * 2) / 2))
+
+export const stepTarget = (target: number, direction: 1 | -1) => Math.max(-40, Math.min(0, Math.round((target + direction * 0.5) * 100) / 100))
+
 export const xOf = (t: number, length: number, width: number) => round((t / (length || 1)) * width)
 
 const points = (curve: Curve, length: number, width: number, height: number) =>

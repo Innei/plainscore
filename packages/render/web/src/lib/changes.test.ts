@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { changeCards, onlyChange, revertChange } from './changes.ts'
+import { changeCards, revertChange } from './changes.ts'
 import { edits as baseEdits, state as baseState } from './fixture.ts'
 
 const edited = () => {
@@ -24,7 +24,8 @@ describe('changeCards', () => {
       ['loudness:A', 'Section loudness'],
       ['mix:harp', 'Mix · harp'],
       ['space', 'Space · wet'],
-      ['master', 'Master · lowcut, air'],
+      ['master:lowcut', 'Master · lowcut'],
+      ['master:air', 'Master · air'],
     ])
   })
 
@@ -69,12 +70,14 @@ describe('revertChange', () => {
   })
 })
 
-describe('onlyChange', () => {
-  it('applies one change on top of the written edits', () => {
-    const { s, e } = edited()
-    const one = onlyChange(s, e, 'space')
-    expect(one.space.wet).toBe(-12)
-    expect(one.loudness.A).toBe(-16)
-    expect(one.mix.harp).toEqual({ gain: -3, send: null })
+describe('revertChange on master', () => {
+  it('reverts one master row and leaves the others changed', () => {
+    const s = baseState()
+    const e = structuredClone(s.edits)
+    e.master = { ...e.master, air: null, lowcut: 40, loudness: -12 }
+    const next = revertChange(s, e, 'master:air')
+    expect(next.master.air).toEqual(s.edits.master.air)
+    expect(next.master.lowcut).toBe(40)
+    expect(revertChange(s, next, 'master:head').master).toMatchObject({ loudness: s.edits.master.loudness, lowcut: 40 })
   })
 })
