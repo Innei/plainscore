@@ -10,7 +10,7 @@ export default defineConfig(({ mode }) => {
   const site = mode === 'site'
   return {
     root: at('.'),
-    base: site ? '/plainscore/' : '/',
+    base: '/',
     publicDir: site ? at('../site-public') : false,
     plugins: [react()],
     resolve: { alias: [{ find: /^plainscore$/, replacement: at('../../../src/index.ts') }] },

@@ -1,4 +1,7 @@
+import { readFileSync, readdirSync } from 'node:fs'
+import { checkScore } from 'plainscore'
 import { describe, expect, it } from 'vitest'
+import { planScore } from '../../../src/session.ts'
 import { MEMORY_LIMIT, estimateBytes } from './memory.ts'
 
 describe('estimateBytes', () => {
@@ -13,7 +16,23 @@ describe('estimateBytes', () => {
     expect(estimateBytes(480, 4)).toBeLessThanOrEqual(MEMORY_LIMIT)
   })
 
-  it('refuses one stem more than that', () => {
-    expect(estimateBytes(240, 9)).toBeGreaterThan(MEMORY_LIMIT)
+  it('refuses four minutes of fourteen stems', () => {
+    expect(estimateBytes(240, 13)).toBeLessThanOrEqual(MEMORY_LIMIT)
+    expect(estimateBytes(240, 14)).toBeGreaterThan(MEMORY_LIMIT)
+  })
+})
+
+describe('the bundled examples', () => {
+  const dir = new URL('../../../../../examples/', import.meta.url)
+  const files = readdirSync(dir).filter((f) => f.endsWith('.score'))
+
+  it.each(files)('%s fits under the limit, every piece and variant', (file) => {
+    const text = readFileSync(new URL(file, dir), 'utf8')
+    for (const piece of checkScore(text, file).pieces) {
+      for (const variant of [null, ...piece.variants.map((v) => v.name)]) {
+        const plan = planScore(text, file, piece.id, variant)
+        expect(estimateBytes(plan.seconds, plan.stems), `${file} ${piece.id} ${variant ?? ''}`).toBeLessThanOrEqual(MEMORY_LIMIT)
+      }
+    }
   })
 })

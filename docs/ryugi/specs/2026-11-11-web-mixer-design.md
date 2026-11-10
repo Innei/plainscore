@@ -55,13 +55,13 @@ Share links, a user's own SoundFont, a phone layout, offline use, MP3 and FLAC o
 | WAV only | accepted recommendation |
 | Three bundled examples | accepted recommendation |
 | Audience: people trying it without the tool, and the author on another machine; no share links | designer's guess, question left unanswered |
-| URL `innei.github.io/plainscore/`, no custom domain | designer |
+| URL `plainscore.innei.dev`, served from the root path | theirs, after the first deploy |
 | The sound file is not committed; the deploy workflow downloads it, verifies a pinned SHA-256 and caches it | designer |
 | After Download, the downloaded text is the new baseline and the change count returns to zero | designer |
 | Before an in-place save, re-read the file through its handle; if it changed since it was loaded, refuse and offer to reload it | designer |
 | Variants are selectable on the landing page | designer |
 | "Open another score" reloads the page | designer |
-| A piece whose estimated memory exceeds 1.5 GB is refused before rendering, with the reason | designer |
+| A piece whose estimated memory exceeds 2.5 GB is refused before rendering, with the reason. First set at 1.5 GB, which refused the bundled `road.score` (4 minutes, 9 stems, about 1.66 GB) | designer |
 | Speed floor, on `ma.score`: if one measure takes over 30 s in the browser, the site turns automatic measuring off and measures on click; if preparing (excluding the sound download) takes over 2 minutes, stop and ask | designer |
 
 ## Structure
@@ -106,7 +106,7 @@ The backend is chosen by build mode and is a singleton for the page's lifetime: 
 
 Holds the session. Fetches the sound file with progress and keeps it in Cache Storage. Every instrument the score uses maps to that one SoundFont; the program comes from `FAMILIES` in the core package, as it does today when `sounds.json` names a SoundFont. Credits come from the SoundFont's own info, as today.
 
-Before rendering it estimates memory from duration × stems and refuses above 1.5 GB. The estimate must agree with these reference points: 4 minutes × 4 stems is about 750 MB; 4 minutes × 8 stems, or 8 minutes × 4 stems, is at the limit.
+Before rendering it estimates memory from duration × stems and refuses above 2.5 GB. Reference points: 4 minutes × 4 stems is about 750 MB; 4 minutes × 13 stems is the most that passes. Every bundled example must pass, and a test holds that.
 
 ### Landing (`web/src/components/Landing.tsx`)
 
@@ -114,7 +114,7 @@ Only in the site build. Drop zone, file picker (using `showOpenFilePicker` when 
 
 ## Build and deploy
 
-- One source, two outputs. `vite build` still writes `mixer/` with the httpBackend. `vite build --mode site` writes `site/` with the workerBackend and `base: '/plainscore/'`.
+- One source, two outputs. `vite build` still writes `mixer/` with the httpBackend. `vite build --mode site` writes `site/` with the workerBackend, served from the root of `plainscore.innei.dev`.
 - `.github/workflows/pages.yml`: on push to `main`, build `site/`, copy `examples/*.score` in, download the sound file, verify its SHA-256, cache it, and deploy with the official Pages actions.
 - The repository's Pages source must be set to "GitHub Actions" once, by the owner, in the repository settings.
 
