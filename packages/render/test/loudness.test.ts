@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { kStages, measure, sectionLoudness, truePeak } from '../src/loudness.ts'
+import { kStages, measure, sectionLoudness, shortTerm, truePeak } from '../src/loudness.ts'
 
 const rate = 48000
 const tone = (freq: number, seconds: number, amp: number, phase = 0) =>
@@ -81,5 +81,19 @@ describe('K-weighting', () => {
     expect(shelf.a2).toBeCloseTo(0.73248077421585, 6)
     expect(high.a1).toBeCloseTo(-1.99004745483398, 6)
     expect(high.a2).toBeCloseTo(0.99007225036621, 6)
+  })
+})
+
+describe('short-term curve', () => {
+  it('gives one 3 s value per second at the tone\'s level', () => {
+    const x = tone(997, 8, dbfs(-23))
+    const values = shortTerm(measure([x, x], rate))
+    expect(values).toHaveLength(6)
+    for (const v of values) expect(v).toBeCloseTo(-23, 0)
+  })
+
+  it('floors silence at -70', () => {
+    const x = new Float32Array(rate * 5)
+    expect(shortTerm(measure([x, x], rate))).toEqual([-70, -70, -70])
   })
 })

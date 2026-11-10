@@ -96,6 +96,18 @@ export const measure = (channels: Float32Array[], rate: number): Measurement => 
   }
 }
 
+export const shortTerm = (m: Measurement, step = 1, window = 3) => {
+  const size = Math.round(window * 10)
+  const hop = Math.round(step * 10)
+  const values: number[] = []
+  for (let s = 0; s + size <= m.segments.length; s += hop) {
+    let sum = 0
+    for (let i = s; i < s + size; i++) sum += m.segments[i]
+    values.push(Math.max(-70, Math.round(toLufs(sum / (size * m.segment)) * 10) / 10))
+  }
+  return values
+}
+
 export const sectionLoudness = (m: Measurement, from: number, to: number) => {
   const step = m.segment / m.rate
   const first = Math.max(0, Math.ceil(from / step - 1e-6))

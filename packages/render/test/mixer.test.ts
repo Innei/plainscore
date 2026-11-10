@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseScore, readEdits, render } from 'plainscore'
@@ -43,11 +43,11 @@ afterEach(async () => {
   close = null
 })
 
-const start = async () => {
+const start = async (page?: string) => {
   const dir = mkdtempSync(join(tmpdir(), 'plainscore-mixer-'))
   const file = join(dir, 'little.score')
   writeFileSync(file, SCORE)
-  const mixer = await startMixer({ file, sounds, piece: 't', variant: null, port: 0, out: join(dir, 'out', 'little'), open: false })
+  const mixer = await startMixer({ file, sounds, piece: 't', variant: null, port: 0, out: join(dir, 'out', 'little'), open: false, page })
   close = mixer.close
   const api = async (path: string, body?: unknown) => {
     const res = await fetch(`${mixer.url}${path}`, body === undefined ? {} : { method: 'POST', body: JSON.stringify(body), headers: { 'content-type': 'application/json' } })
@@ -85,13 +85,39 @@ describe('mixer server', () => {
     expect(json.report.sections[0].target).toBe(-16)
   })
 
+  it('returns the loudness curve, lanes, section parts and the file text', async () => {
+    const { api } = await start()
+    const { json } = await api('/api/state')
+    expect(json.curve.step).toBe(1)
+    expect(json.curve.window).toBe(3)
+    expect(json.curve.values.length).toBe(Math.max(0, Math.floor(json.report.seconds) - 2))
+    expect(json.lanes.map((l: { target: string }) => l.target)).toEqual(['harp', 'tune'])
+    for (const lane of json.lanes) expect(lane.spans.length).toBeGreaterThan(0)
+    expect(json.sections[0].parts).toEqual(['pad', 'tune'])
+    expect(json.text).toBe(SCORE)
+  })
+
+  it('says how to build the page when it is missing', async () => {
+    const empty = mkdtempSync(join(tmpdir(), 'plainscore-page-'))
+    mkdirSync(join(empty, 'assets'))
+    const { mixer } = await start(empty)
+    const res = await fetch(`${mixer.url}/`)
+    expect(res.status).toBe(503)
+    expect(await res.text()).toContain('pnpm build')
+  })
+
   it('serves stems as WAV and the page', async () => {
-    const { api, mixer } = await start()
+    const page = mkdtempSync(join(tmpdir(), 'plainscore-page-'))
+    writeFileSync(join(page, 'index.html'), '<!doctype html><title>mixer</title>')
+    mkdirSync(join(page, 'assets'))
+    writeFileSync(join(page, 'assets', 'app.js'), 'export {}')
+    const { api, mixer } = await start(page)
     const wav = await api('/stems/0.wav')
     expect(wav.res.headers.get('content-type')).toBe('audio/wav')
     expect(new TextDecoder().decode(new Uint8Array(await wav.res.arrayBuffer()).subarray(0, 4))).toBe('RIFF')
-    const page = await fetch(`${mixer.url}/`)
-    expect(await page.text()).toContain('<title>')
+    expect(await (await fetch(`${mixer.url}/`)).text()).toContain('<title>')
+    const js = await fetch(`${mixer.url}/assets/app.js`)
+    expect(js.headers.get('content-type')).toContain('javascript')
   })
 
   it('measures with edited settings', async () => {
@@ -99,6 +125,7 @@ describe('mixer server', () => {
     const { json: state } = await api('/api/state')
     const { json } = await api('/api/measure', { edits: { ...state.edits, loudness: { A: null, B: null } } })
     expect(json.report.sections.map((s: { compensation: number }) => s.compensation)).toEqual([0, 0])
+    expect(json.curve.values.length).toBe(state.curve.values.length)
   })
 
   it('shows the diff, then writes only the changed line', async () => {
@@ -132,5 +159,6 @@ describe('mixer server', () => {
     const { json } = await api('/api/export', { edits: state.edits, formats: ['wav'] })
     expect(json.files).toEqual([join(dir, 'out', 'little.wav')])
     expect(readFileSync(json.files[0]).subarray(0, 4).toString()).toBe('RIFF')
+    expect(json.curve.values.length).toBeGreaterThan(0)
   })
 })

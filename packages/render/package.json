@@ -25,15 +25,27 @@
     "mixer"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit"
+    "build": "tsc -p tsconfig.build.json && vite build --config web/vite.config.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p web",
+    "dev": "vite --config web/vite.config.ts"
   },
   "dependencies": {
     "plainscore": "workspace:^",
     "spessasynth_core": "4.4.9"
   },
   "devDependencies": {
+    "@lobehub/fluent-emoji": "^5.0.1",
+    "@lobehub/icons": "^6.15.0",
+    "@lobehub/ui": "6.15.2",
     "@types/node": "^24.19.2",
-    "typescript": "5.9.3"
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "lucide-react": "^1.71.0",
+    "motion": "^14.12.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.7"
   }
 }

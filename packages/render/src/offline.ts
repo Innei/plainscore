@@ -1,5 +1,5 @@
 import { BAR, DEFAULT_SEED, type Master, type Mix, type Rendering, type ScoreFile, type Space, checkScore, render } from 'plainscore'
-import { measure, sectionLoudness, truePeak } from './loudness.ts'
+import { measure, sectionLoudness, shortTerm, truePeak } from './loudness.ts'
 import { balance, finish, masterEq } from './master.ts'
 import { mixdown } from './mixdown.ts'
 import { type Report, SEAM_DB, formatReport, seamCheck, soundingSpans } from './report.ts'
@@ -132,7 +132,7 @@ export const masterStems = (stems: Stem[], r: Rendering, rate: number, options: 
     seams: seamCheck(done.audio, rate, edges, spansSounding, options.seamDb ?? SEAM_DB),
     credits: options.credits ?? [],
   }
-  return { audio: done.audio, report }
+  return { audio: done.audio, report, curve: { step: 1, window: 3, values: shortTerm(m) } }
 }
 
 export const renderOffline = async (score: ScoreFile | string, sounds: Sounds, options: OfflineOptions = {}) => {

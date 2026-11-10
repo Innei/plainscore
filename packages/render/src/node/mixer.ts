@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process'
 import { type FSWatcher, watch } from 'node:fs'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { type IncomingMessage, type ServerResponse, createServer } from 'node:http'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -9,7 +9,7 @@ import { encodeWav } from '../dsp/wav.ts'
 import { type Overrides, RATE, credits, masterStems, sectionSpans } from '../offline.ts'
 import type { Report } from '../report.ts'
 import type { Sounds } from '../sources/types.ts'
-import { type Stem, renderStems } from '../stems.ts'
+import { type Stem, renderStems, stemTarget, timeline } from '../stems.ts'
 import { encodeWith } from './encode.ts'
 
 export interface MixerOptions {
@@ -20,6 +20,7 @@ export interface MixerOptions {
   port?: number
   out?: string
   open?: boolean
+  page?: string
 }
 
 export type DiffLine = { kind: 'same' | 'add' | 'del'; line: string; at: number }
@@ -45,8 +46,29 @@ export const lineDiff = (before: string, after: string): DiffLine[] => {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const PAGE = resolve(here, '../../mixer')
-const LIB = resolve(here, '..')
-const TYPES: Record<string, string> = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' }
+const TYPES: Record<string, string> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.png': 'image/png',
+  '.json': 'application/json',
+}
+const UNBUILT = 'The mixer page is not built. Run `pnpm build` in packages/render, then start the mixer again.'
+
+export type Curve = { step: number; window: number; values: number[] }
+
+const merge = (spans: [number, number][], gap = 0.25) => {
+  const sorted = [...spans].sort((a, b) => a[0] - b[0])
+  const out: [number, number][] = []
+  for (const [a, b] of sorted) {
+    const last = out.at(-1)
+    if (last && a <= last[1] + gap) last[1] = Math.max(last[1], b)
+    else out.push([a, b])
+  }
+  return out.map(([a, b]) => [Math.round(a * 100) / 100, Math.round(b * 100) / 100] as [number, number])
+}
 
 interface State {
   text: string
@@ -55,6 +77,7 @@ interface State {
   stems: Stem[]
   credits: Report['credits']
   report: Report
+  curve: Curve
   version: number
   wavs: Map<number, Uint8Array>
 }
@@ -72,6 +95,7 @@ const send = (res: ServerResponse, status: number, data: unknown, type = 'applic
 
 export const startMixer = async (options: MixerOptions) => {
   const file = resolve(options.file)
+  const page = resolve(options.page ?? PAGE)
   const out = options.out ?? join(dirname(file), 'out', basename(file, extname(file)))
   const renderOf = (score: ScoreFile) => render(score, options.piece, { variant: options.variant, seed: DEFAULT_SEED, perform: true })
 
@@ -80,8 +104,8 @@ export const startMixer = async (options: MixerOptions) => {
     const rendering = renderOf(score)
     const stems = keepStems ?? (await renderStems(rendering, options.sounds, RATE)).stems
     const credit = await credits(rendering, options.sounds)
-    const { report } = masterStems(stems, rendering, RATE, { credits: credit })
-    return { text, score, rendering, stems, credits: credit, report, version, wavs: new Map() }
+    const { report, curve } = masterStems(stems, rendering, RATE, { credits: credit })
+    return { text, score, rendering, stems, credits: credit, report, curve, version, wavs: new Map() }
   }
 
   let state = await load(await readFile(file, 'utf8'), 1)
@@ -98,6 +122,8 @@ export const startMixer = async (options: MixerOptions) => {
   const describe = () => {
     const r = state.rendering
     const spans = sectionSpans(r, state.stems[0]?.channels[0].length / RATE || 0)
+    const at = timeline(r)
+    const sounding = r.events.map((e) => ({ part: e.part, target: stemTarget(r, e), start: at(e.step + e.offset), end: at(e.step + e.offset + e.length) }))
     const partInst = Object.fromEntries(
       Object.keys(r.mix.parts).map((p) => [p, [...new Set(r.events.filter((e) => e.part === p).map((e) => e.inst))].join(' ')]),
     )
@@ -109,12 +135,23 @@ export const startMixer = async (options: MixerOptions) => {
       variant: r.variant,
       tempo: r.tempo,
       bars: r.bars,
-      sections: r.sections.map((s, i) => ({ mark: s.mark, label: s.label, start: spans[i].start, end: spans[i].end, tonic: s.tonic, keyChange: s.tonic !== r.tonic })),
+      sections: r.sections.map((s, i) => ({
+        mark: s.mark,
+        label: s.label,
+        start: spans[i].start,
+        end: spans[i].end,
+        tonic: s.tonic,
+        keyChange: s.tonic !== r.tonic,
+        parts: [...new Set(sounding.filter((e) => e.start < spans[i].end && e.end > spans[i].start).map((e) => e.part))].sort(),
+      })),
       stems: state.stems.map((s, i) => ({ index: i, target: s.target, kind: s.kind, insts: s.insts })),
       edits: readEdits(state.score, options.piece),
       mix: r.mix,
       partInst,
       report: state.report,
+      curve: state.curve,
+      lanes: state.stems.map((st) => ({ target: st.target, spans: merge(sounding.filter((e) => e.target === st.target).map((e) => [e.start, e.end])) })),
+      text: state.text,
     }
   }
 
@@ -140,8 +177,8 @@ export const startMixer = async (options: MixerOptions) => {
     'GET /api/state': async (_, res) => send(res, 200, describe()),
     'POST /api/measure': async (req, res) => {
       const { edits } = await body(req)
-      const { report } = masterStems(state.stems, state.rendering, RATE, { credits: state.credits, overrides: overridesOf(edits) })
-      send(res, 200, { report })
+      const { report, curve } = masterStems(state.stems, state.rendering, RATE, { credits: state.credits, overrides: overridesOf(edits) })
+      send(res, 200, { report, curve })
     },
     'POST /api/diff': async (req, res) => {
       const { edits } = await body(req)
@@ -159,7 +196,7 @@ export const startMixer = async (options: MixerOptions) => {
     },
     'POST /api/export': async (req, res) => {
       const { edits, formats = ['wav'] } = await body(req)
-      const { audio, report } = masterStems(state.stems, state.rendering, RATE, { credits: state.credits, overrides: overridesOf(edits) })
+      const { audio, report, curve } = masterStems(state.stems, state.rendering, RATE, { credits: state.credits, overrides: overridesOf(edits) })
       await mkdir(dirname(out), { recursive: true })
       await writeFile(`${out}.wav`, encodeWav(audio, RATE, 24))
       const r = state.rendering
@@ -172,7 +209,7 @@ export const startMixer = async (options: MixerOptions) => {
       }
       if (!formats.includes('wav')) files.shift()
       await writeFile(`${out}.report.json`, `${JSON.stringify(report, null, 2)}\n`)
-      send(res, 200, { files, report })
+      send(res, 200, { files, report, curve })
     },
     'GET /api/events': async (req, res) => {
       res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-store', connection: 'keep-alive' })
@@ -193,8 +230,9 @@ export const startMixer = async (options: MixerOptions) => {
         if (!state.wavs.has(i)) state.wavs.set(i, encodeWav(state.stems[i].channels, RATE, 16))
         return send(res, 200, state.wavs.get(i), 'audio/wav')
       }
-      const asset = url.pathname === '/' ? join(PAGE, 'index.html') : url.pathname.startsWith('/lib/') ? join(LIB, url.pathname.slice(5)) : join(PAGE, url.pathname.slice(1))
-      if (!asset.startsWith(PAGE) && !asset.startsWith(LIB)) return send(res, 404, { error: 'not found' })
+      const asset = url.pathname === '/' ? join(page, 'index.html') : resolve(page, `.${url.pathname}`)
+      if (!asset.startsWith(page)) return send(res, 404, { error: 'not found' })
+      if (url.pathname === '/' && !(await stat(asset).catch(() => null))) return send(res, 503, UNBUILT, 'text/plain; charset=utf-8')
       const type = TYPES[extname(asset)]
       if (!type) return send(res, 404, { error: 'not found' })
       send(res, 200, await readFile(asset), type)

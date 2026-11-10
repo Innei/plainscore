@@ -38,7 +38,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json && pnpm -C packages/render build",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/render",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p packages/render && tsc --noEmit -p packages/render/web",
     "test": "vitest run",
     "prepare": "tsc -p tsconfig.build.json"
   },
