@@ -1,6 +1,0 @@
-{
-  "piano": { "soundfont": "./sounds/MuseScore_General.sf3", "credit": "MuseScore_General.sf3 (MIT): FluidR3 by Frank Wen (c) 2000-02; FluidR3Mono by Michael Cowgill (c) 2014-17; MuseScore_General adaptation by S. Christian Collins (c) 2018-19" },
-  "violins": { "soundfont": "./sounds/MuseScore_General.sf3", "credit": "MuseScore_General.sf3 (MIT): FluidR3 by Frank Wen (c) 2000-02; FluidR3Mono by Michael Cowgill (c) 2014-17; MuseScore_General adaptation by S. Christian Collins (c) 2018-19" },
-  "cello": { "soundfont": "./sounds/MuseScore_General.sf3", "credit": "MuseScore_General.sf3 (MIT): FluidR3 by Frank Wen (c) 2000-02; FluidR3Mono by Michael Cowgill (c) 2014-17; MuseScore_General adaptation by S. Christian Collins (c) 2018-19" },
-  "harp": { "soundfont": "./sounds/MuseScore_General.sf3", "credit": "MuseScore_General.sf3 (MIT): FluidR3 by Frank Wen (c) 2000-02; FluidR3Mono by Michael Cowgill (c) 2014-17; MuseScore_General adaptation by S. Christian Collins (c) 2018-19" }
-}

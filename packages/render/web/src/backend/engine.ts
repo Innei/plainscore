@@ -8,15 +8,21 @@ import { MEMORY_LIMIT, estimateBytes } from './memory.ts'
 
 export type Progress = { stage: 'sounds'; loaded: number; total: number | null } | { stage: 'rendering' } | { stage: 'measuring' }
 
+export interface Prepared {
+  sounds: Sounds
+  soundfont: string[]
+}
+
 export interface OpenRequest {
   text: string
   name: string
   piece: string
   variant: string | null
+  prepared?: Prepared
 }
 
 export interface EngineOptions {
-  loadSounds: (instruments: string[], onProgress: (progress: Progress) => void) => Promise<Sounds>
+  loadSounds: (instruments: string[], onProgress: (progress: Progress) => void, prepared?: Prepared) => Promise<Sounds>
   limit?: number
 }
 
@@ -37,9 +43,10 @@ export const createEngine = ({ loadSounds, limit = MEMORY_LIMIT }: EngineOptions
         const minutes = Math.round(plan.seconds / 6) / 10
         throw new Error(`This piece is too large to render in the browser: ${minutes} minutes in ${plan.stems} parts needs about ${Math.round(bytes / 1e6)} MB. Use the plainscore-render mixer command for it.`)
       }
-      const sounds = await loadSounds(checkScore(request.text, request.name).instruments.map((i) => i.name), onProgress)
-      name = request.name
-      session = await createSession({ ...request, sounds, onProgress })
+      const { prepared, ...score } = request
+      const sounds = await loadSounds(checkScore(score.text, score.name).instruments.map((i) => i.name), onProgress, prepared)
+      name = score.name
+      session = await createSession({ ...score, sounds, onProgress })
       return state()
     },
     state,

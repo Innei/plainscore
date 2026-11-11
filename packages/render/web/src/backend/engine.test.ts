@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { SCORE, SOUNDS, backendContract } from './contract.ts'
 import { createEngine } from './engine.ts'
+import { completeSounds } from './sounds.ts'
 import { type ScoreFiles, type Transport, createWorkerBackend } from './workerBackend.ts'
 
 const OPEN = { text: SCORE, name: 'little.score', piece: 't', variant: null }
@@ -44,6 +45,31 @@ describe('the browser engine', () => {
     const engine = createEngine({ loadSounds: async (instruments) => ((asked = instruments), SOUNDS) })
     await engine.open(OPEN, () => {})
     expect(asked).toEqual(['piano', 'harp'])
+  })
+})
+
+describe('completing the sounds the page prepared', () => {
+  it('uses the prepared samples without fetching the SoundFont', async () => {
+    let fetched = 0
+    const sounds = await completeSounds({ sounds: SOUNDS, soundfont: [] }, async () => (fetched++, new ArrayBuffer(8)))
+    expect(sounds).toEqual(SOUNDS)
+    expect(fetched).toBe(0)
+  })
+
+  it('fetches the SoundFont once for the sounds the samples lack', async () => {
+    let fetched = 0
+    const buffer = new ArrayBuffer(8)
+    const sounds = await completeSounds({ sounds: SOUNDS, soundfont: ['cello', 'cello pizz.'] }, async () => (fetched++, buffer))
+    expect(fetched).toBe(1)
+    expect(sounds).toEqual({ ...SOUNDS, cello: { soundfont: buffer }, 'cello pizz.': { soundfont: buffer } })
+  })
+
+  it('hands the prepared sounds from the open request to the loader', async () => {
+    let given: unknown
+    const prepared = { sounds: SOUNDS, soundfont: [] }
+    const engine = createEngine({ loadSounds: async (_, __, p) => ((given = p), SOUNDS) })
+    await engine.open({ ...OPEN, prepared }, () => {})
+    expect(given).toBe(prepared)
   })
 })
 

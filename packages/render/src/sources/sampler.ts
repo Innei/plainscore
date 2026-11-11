@@ -50,10 +50,10 @@ export const playSampler = (source: SampleSource, out: Float32Array[], rate: num
   }
   const first = near.duration / ratio
   const segments = [{ at: note.at, offset: near.offset, length: first, fadeIn: false }]
-  if (source.sustain) {
-    const loop = (near.duration - SKIP) / ratio
-    for (let t = note.at + first - XFADE; t < stopAt; t += loop - XFADE) segments.push({ at: t, offset: near.offset + SKIP, length: loop, fadeIn: true })
-  }
+  const loop = (near.duration - SKIP) / ratio
+  const looping = source.sustain && loop > 0
+  const fade = looping ? Math.min(XFADE, loop / 2) : XFADE
+  if (looping) for (let t = note.at + first - fade; t < stopAt; t += loop - fade) segments.push({ at: t, offset: near.offset + SKIP, length: loop, fadeIn: true })
   const step = (ratio * source.rate) / rate
   const [left, right = left] = source.samples
   for (const seg of segments) {
@@ -69,8 +69,8 @@ export const playSampler = (source: SampleSource, out: Float32Array[], rate: num
       if (k + 1 >= left.length) break
       const f = pos - k
       let gain = envelope(t)
-      if (seg.fadeIn && t < seg.at + XFADE) gain *= (t - seg.at) / XFADE
-      if (fadesOut && t > segEnd - XFADE) gain *= Math.max(0, (segEnd - t) / XFADE)
+      if (seg.fadeIn && t < seg.at + fade) gain *= (t - seg.at) / fade
+      if (fadesOut && t > segEnd - fade) gain *= Math.max(0, (segEnd - t) / fade)
       out[0][i] += gain * (left[k] + (left[k + 1] - left[k]) * f)
       out[1][i] += gain * (right[k] + (right[k + 1] - right[k]) * f)
     }

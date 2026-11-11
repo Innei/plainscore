@@ -10,12 +10,14 @@ const here = dirname(fileURLToPath(import.meta.url))
 const out = resolve(here, '../site-public')
 const sf3 = join(out, 'sounds', 'MuseScore_General.sf3')
 const examples = resolve(here, '../../../examples')
+const samples = resolve(here, '../sounds')
 
 const USAGE = `usage: node scripts/fetch-sounds.mjs [--print-hash]
 
 Fills packages/render/site-public for the site build:
   sounds/MuseScore_General.sf3   downloaded from ${URL_SF3}
                                  and checked against the pinned SHA-256
+  sounds/*                       copied from packages/render/sounds (the baked samples)
   examples/*.score               copied from the repository's examples
 
 --print-hash   download if needed, print the file's SHA-256 and skip the check`
@@ -34,6 +36,7 @@ const main = async () => {
   const hash = hashOf(sf3)
   if (printOnly) return console.log(hash)
   if (hash !== SHA256) throw new Error(`MuseScore_General.sf3 has SHA-256 ${hash}, expected ${SHA256}; delete ${sf3} and run again, or update the pinned hash if the file was republished`)
+  for (const file of readdirSync(samples)) copyFileSync(join(samples, file), join(out, 'sounds', file))
   mkdirSync(join(out, 'examples'), { recursive: true })
   for (const file of readdirSync(examples).filter((f) => f.endsWith('.score'))) copyFileSync(join(examples, file), join(out, 'examples', file))
   console.log(`site-public is ready: ${sf3}`)

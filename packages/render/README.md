@@ -20,14 +20,16 @@ npx plainscore-render mixer song.score --sounds sounds.json
 }
 ```
 
+[`sounds/sounds.json`](sounds/sounds.json) is a ready set: Salamander Grand Piano (CC BY 3.0) and VSCO 2 CE strings and harp (CC0), the sounds the site plays. `node scripts/bake-samples.ts <dir>` rebuilds it from the source WAVs and `sprites.json`.
+
 From code: `renderOffline(text, sounds)` in Node or the browser (in Node, `loadSounds` from `plainscore-render/node` reads `sounds.json`), and `liveGraph(ctx, rendering)` from `plainscore-render/live` for a WebAudio graph that matches the offline mix.
 
 ## The mixer on the web
 
-The same page also builds as a static site that renders in the browser: drop in a `.score`, or open an example, and mix it with a hosted copy of MuseScore_General.sf3. Nothing is uploaded.
+The same page also builds as a static site that renders in the browser: drop in a `.score`, or open an example, and mix it with the samples in [`sounds/`](sounds/); MuseScore_General.sf3 is fetched only for instruments they don't cover. Nothing is uploaded.
 
 ```bash
-pnpm -C packages/render site:assets   # downloads the sounds (40 MB) and copies the examples into site-public/
+pnpm -C packages/render site:assets   # copies the samples and examples into site-public/ and downloads MuseScore_General.sf3 (40 MB)
 pnpm -C packages/render dev:site      # or build:site, which writes site/
 ```
 

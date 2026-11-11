@@ -1,8 +1,8 @@
-score 0.1
+score 0.3
 # 来路  The Road Behind
 #   Movement I of bgm.score, arranged as one through-composed piece. 4:02.
 #
-# Legend (score 0.1)
+# Legend (score 0.3)
 #   Pitches sound as written. Durations w h q e s, "." dotted, "+" ties (w+s), r = rest.
 #   Counts 1 & 2 & 3 & 4 &; "2.3&" = bar 2 of the chord (or of the section, in a "once" part).
 #   Chord tones: bass; t1-t4 / v1-v6 low to high; top; chord = all; upper = all but the lowest;
@@ -195,36 +195,49 @@ piece road  来路  The Road Behind
     1.1   harp  top+8va  w+w  pp  late 50ms
 
   form  — mark, chords, then who plays
-    Intro  prelude  — 序
+    Intro  prelude  loudness -21.2  — 序
       wash mp, stream p 85%, drone pp 85% bars 1-2, flow p 70% bars 3-4,
       cello-pad 45% bars 3-4, violin-pad pp, pedal, breath, pickup-d
-    A1  theme  — 来路 I
+    A1  theme  loudness -19.2  — 来路 I
       flow p 85%, theme 85%, pedal
-    A2  theme  — 来路 II
+    A2  theme  loudness -14.7  — 来路 II
       flow mp, stream mp, cello-pad, theme, pedal, breath, pickup-b
-    B1  turn  — 回望
+    B1  turn  loudness -17.5  — 回望
       flow p 70%, cello-pad 90%, violin-pad p, harp-roll p, turn, pedal, turn-pedal, breath, gliss
-    A3  theme  — 来路 III
+    A3  theme  loudness -13.6  — 来路 III
       flow mp, stream mp, cello-pad, violin-pad pppp, wash mf, wash-iv p, theme 8va, violin-theme mf, pedal
-    A4  theme  — 余音
+    A4  theme  loudness -18.1  — 余音
       sparse mp 85%, cello-pad 50%, pizz, theme 85% on 1 and 3, pedal, breath
-    Lift  lift in E  — 升
+    Lift  lift in E  loudness -15.6  — 升
       lift, lift-strings, pedal
-    A5  theme in E  — 来路 IV
+    A5  theme in E  loudness -14.2  — 来路 IV
       flow mp, stream mp, cello-pad, violin-pad mf, theme, pedal
-    B2  turn in E  — 回望
+    B2  turn in E  loudness -15.8  — 回望
       flow mp 75%, cello-pad 90%, harp-roll p, turn, violin-turn mp, pedal, turn-pedal, breath, gliss
-    A6  theme in E  — 来路 V
+    A6  theme in E  loudness -12.7  — 来路 V
       flow mf, stream mf, cello-pad, violin-pad pppp, wash mf, wash-iv p, theme f 8va, violin-theme f, pedal
-    Coda  coda in E  — 尾声
+    Coda  coda in E  loudness -17.6  — 尾声
       cut, coda-entry, coda-strings, flow mp 92%-75%, cello-pad 35% bars 3-8, violin-pad p bars 5-6, coda 92%-75%, pedal
     Fine  fine in E  — 终
       cut, final
 
   mix  — playback balance; the score and MIDI ignore it
+    piano            0 dB                send -10.5 dB
+    cello         -8.8 dB  pan -0.16     send -6 dB
+    violins        -13 dB  pan 0.1       send -5.2 dB
+    harp          -7.2 dB  pan 0.18      send -6.9 dB
     violin-theme   +13 dB  attack 200ms
     violin-turn    +13 dB  attack 220ms
     violin-pad     +6 dB
-    pizz           +16 dB
+    pizz           +19 dB  send -8 dB    — the site mixed pizz 3 dB above the bowed violins
     lift-strings   +13 dB  attack 400ms
     coda-strings   +13 dB  attack 50ms
+
+  space  decay 4.2s  predelay 24ms  damp 6500 Hz  wet -11 dB
+
+  master  -15.5 LUFS  ceiling -1.5 dBTP  fade 15s
+    lowcut    26 Hz
+    presence  +1 dB
+    air       +2 dB at 11000 Hz
+
+  perform off  — the site plays the score as written

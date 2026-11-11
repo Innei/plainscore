@@ -24,12 +24,12 @@ export const createWorkerTransport = (worker: Worker) => {
     for (const entry of waiting.values()) entry.fail(new Error(event.message || 'The renderer stopped; the piece may be too large for this browser.'))
     waiting.clear()
   }
-  const send = (method: string, args: unknown[], onProgress?: (progress: Progress) => void) =>
+  const send = (method: string, args: unknown[], onProgress?: (progress: Progress) => void, transfer: Transferable[] = []) =>
     new Promise<unknown>((done, fail) => {
       const id = ++next
       waiting.set(id, { done, fail, onProgress })
-      worker.postMessage({ id, method, args })
+      worker.postMessage({ id, method, args }, transfer)
     })
   const transport: Transport = { call: (method, args) => send(method, args) }
-  return { transport, open: (request: OpenRequest, onProgress: (progress: Progress) => void) => send('open', [request], onProgress) as Promise<MixerState> }
+  return { transport, open: (request: OpenRequest, onProgress: (progress: Progress) => void, transfer?: Transferable[]) => send('open', [request], onProgress, transfer) as Promise<MixerState> }
 }

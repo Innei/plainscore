@@ -142,4 +142,17 @@ describe('sampler', () => {
     playSampler({ ...source, sustain: true }, out, rate, { midi: 69, at: 0, length: 6, velocity: 1 })
     expect(energy(out[0], 5, 5.9)).toBeGreaterThan(energy(out[0], 0.5, 1.4) * 0.5)
   })
+
+  it('plays a sustained sprite too short to loop', () => {
+    const out = [new Float32Array(rate * 3), new Float32Array(rate * 3)]
+    playSampler({ ...source, sprite: { A4: [0, 0.5] }, sustain: true }, out, rate, { midi: 69, at: 0, length: 2, velocity: 1 })
+    expect(energy(out[0], 0.1, 0.4)).toBeGreaterThan(1)
+    expect(out[0].every(Number.isFinite)).toBe(true)
+  })
+
+  it('sustains a note shifted far above its sprite', () => {
+    const out = [new Float32Array(rate * 6), new Float32Array(rate * 6)]
+    playSampler({ ...source, sustain: true }, out, rate, { midi: 69 + 24, at: 0, length: 4, velocity: 1 })
+    expect(energy(out[0], 3, 3.9)).toBeGreaterThan(energy(out[0], 0.2, 1.1) * 0.25)
+  })
 })

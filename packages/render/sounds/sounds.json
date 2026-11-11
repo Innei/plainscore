@@ -1,0 +1,39 @@
+{
+  "piano": {
+    "samples": "./piano-c2701b8d.mp3",
+    "sprite": "./sprites.json#piano",
+    "attack": 0.003,
+    "release": 1.6,
+    "credit": "Salamander Grand Piano by Alexander Holm (CC BY 3.0)"
+  },
+  "cello": {
+    "samples": "./cello-a3279707.mp3",
+    "sprite": "./sprites.json#cello",
+    "attack": 0.35,
+    "release": 2.4,
+    "sustain": true,
+    "credit": "VSCO 2 Community Edition by Versilian Studios (CC0)"
+  },
+  "violins": {
+    "samples": "./violins-07697d43.mp3",
+    "sprite": "./sprites.json#violins",
+    "attack": 0.55,
+    "release": 2.8,
+    "sustain": true,
+    "credit": "VSCO 2 Community Edition by Versilian Studios (CC0)"
+  },
+  "harp": {
+    "samples": "./harp-993ad9b7.mp3",
+    "sprite": "./sprites.json#harp",
+    "attack": 0.003,
+    "release": 2.6,
+    "credit": "VSCO 2 Community Edition by Versilian Studios (CC0)"
+  },
+  "violins pizz.": {
+    "samples": "./pizz-a17b21d9.mp3",
+    "sprite": "./sprites.json#pizz",
+    "attack": 0.003,
+    "release": 0.8,
+    "credit": "VSCO 2 Community Edition by Versilian Studios (CC0)"
+  }
+}

@@ -1,5 +1,5 @@
 import { type OpenRequest, createEngine } from './engine.ts'
-import { fetchSoundfont, soundsFor } from './sounds.ts'
+import { completeSounds, fetchSoundfont, soundsFor } from './sounds.ts'
 
 interface Request {
   id: number
@@ -9,8 +9,13 @@ interface Request {
 
 const scope = self as unknown as { postMessage(message: unknown): void; onmessage: ((event: MessageEvent<Request>) => void) | null }
 
+const SOUNDFONT = new URL(`${import.meta.env.BASE_URL}sounds/MuseScore_General.sf3`, self.location.origin).href
+
 const engine = createEngine({
-  loadSounds: async (instruments, onProgress) => soundsFor(instruments, await fetchSoundfont(new URL(`${import.meta.env.BASE_URL}sounds/MuseScore_General.sf3`, self.location.origin).href, onProgress)),
+  loadSounds: async (instruments, onProgress, prepared) => {
+    const soundfont = () => fetchSoundfont(SOUNDFONT, onProgress)
+    return prepared ? completeSounds(prepared, soundfont) : soundsFor(instruments, await soundfont())
+  },
 })
 
 scope.onmessage = async ({ data: { id, method, args } }) => {

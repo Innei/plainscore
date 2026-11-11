@@ -72,7 +72,7 @@ piece song  Evening Song
 
 - [bgm.score](examples/bgm.score): two pieces with variants, loop, ad lib. and mix
 - [road.score](examples/road.score): a full single for piano, harp and strings
-- [ma.score](examples/ma.score): 間 Ma, a piano single in D with strings and harp, mixed and mastered in the score; `npx plainscore-render render examples/ma.score --sounds examples/sounds.json -o examples/out/ma` after putting MuseScore_General.sf3 in `examples/sounds/`
+- [ma.score](examples/ma.score): 間 Ma, a piano single in D with strings and harp, mixed and mastered in the score; `npx plainscore-render render examples/ma.score --sounds packages/render/sounds/sounds.json -o examples/out/ma`
 
 ## API
 

@@ -1,6 +1,7 @@
 import { checkScore } from 'plainscore'
 import { useRef, useState } from 'react'
 import type { Progress } from '../backend/engine.ts'
+import { browserSoundDeps, prepareSiteSounds } from '../backend/siteSounds.ts'
 import type { MixerBackend } from '../backend/types.ts'
 import { createWorkerBackend } from '../backend/workerBackend.ts'
 import { createWorkerTransport } from '../backend/workerTransport.ts'
@@ -44,11 +45,14 @@ export const Landing = ({ onReady }: { onReady: (backend: MixerBackend) => void 
     const worker = new Worker(new URL('../backend/worker.ts', import.meta.url), { type: 'module' })
     const { transport, open } = createWorkerTransport(worker)
     let measuringSince = 0
+    const onProgress = (progress: Progress) => {
+      if (progress.stage === 'measuring') measuringSince = performance.now()
+      setStage({ kind: 'preparing', name: opened.name, progress })
+    }
     try {
-      await open({ text: opened.text, name: opened.name, piece, variant }, (progress) => {
-        if (progress.stage === 'measuring') measuringSince = performance.now()
-        setStage({ kind: 'preparing', name: opened.name, progress })
-      })
+      const manifest = new URL(`${import.meta.env.BASE_URL}sounds/sounds.json`, location.origin).href
+      const { prepared, transfer } = await prepareSiteSounds({ text: opened.text, name: opened.name, piece, variant }, browserSoundDeps(manifest), onProgress)
+      await open({ text: opened.text, name: opened.name, piece, variant, prepared }, onProgress, transfer)
       const files = createScoreFiles({ ...opened, download: downloadBlob })
       onReady(createWorkerBackend(transport, files, { autoMeasure: performance.now() - measuringSince <= SLOW_MEASURE_MS }))
     } catch (error) {
@@ -165,7 +169,7 @@ export const Landing = ({ onReady }: { onReady: (backend: MixerBackend) => void 
               <i style={{ width: stage.progress?.stage === 'sounds' && stage.progress.total ? `${(stage.progress.loaded / stage.progress.total) * 100}%` : stage.progress ? '100%' : '0%' }} />
             </div>
             <p>{progressText(stage.progress)}</p>
-            <p className="landing-note">The first visit downloads about 40 MB of sounds. A long piece can take a minute or more to render.</p>
+            <p className="landing-note">The first visit downloads about 3.5 MB of sounds. A long piece can take a minute or more to render.</p>
           </section>
         )}
       </div>
